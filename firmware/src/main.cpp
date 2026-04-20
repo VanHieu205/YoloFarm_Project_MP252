@@ -1,0 +1,16 @@
+#include "global.h"
+#include "temp_humi_monitor.h"
+#include "light_soil_monitor.h"
+#include "lcd.h"
+
+void setup()
+{
+  Serial.begin(115200);
+  xTaskCreate(temp_humi_monitor, "TempHumiMonitor", 4096, NULL, 1, NULL);
+  xTaskCreate(light_soil_monitor, "LightSoil_Task", 4096, NULL, 1, NULL);
+  //xTaskCreate(lcd_display_task, "LCD_Display", 4096, NULL, 2, NULL);
+  
+}
+void loop()
+{
+}
