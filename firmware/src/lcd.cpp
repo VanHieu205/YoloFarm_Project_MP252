@@ -1,6 +1,7 @@
 #include "lcd.h"
 #include "global.h" 
 #include <Wire.h>
+#include <WiFi.h>
 
 LiquidCrystal_I2C lcd(33, 16, 2);   // Địa chỉ 0x21
 
@@ -108,10 +109,10 @@ void updateLCDPages() {
       lcdPrintLine(lcd, 1, "WAITING MODEL...");
       break;
     }
-    case 4: { // Trang Mạng 
-      if (isWifiConnected) {
+    case 4: {
+      if (WiFi.status() == WL_CONNECTED) {
         lcdPrintLine(lcd, 0, "WiFi: CONNECTED ");
-        lcdPrintLine(lcd, 1, "System Online   ");
+        lcdPrintLine(lcd, 1, WiFi.localIP().toString().c_str());
       } else {
         lcdPrintLine(lcd, 0, "WiFi:DISCONNECT ");
         lcdPrintLine(lcd, 1, "Check Network   ");
@@ -134,7 +135,7 @@ void lcd_display_task(void *pvParameters) {
         xSemaphoreGive(xI2CMutex);
     }
     
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(2000)); // Để chữ Starting... hiện 2 giây cho ngầu
     
     while (1) {
         if (xI2CMutex != NULL) {
@@ -144,7 +145,7 @@ void lcd_display_task(void *pvParameters) {
             }
         }
 
-        // 3. Delay để nhường CPU cho các Task khác
-        vTaskDelay(pdMS_TO_TICKS(100)); 
+        // TỐI ƯU: Đã tăng delay lên 500ms để không chiếm dụng đường truyền của DHT20
+        vTaskDelay(pdMS_TO_TICKS(500)); 
     }
 }

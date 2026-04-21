@@ -11,13 +11,12 @@ bool glob_pump_state = false;
 unsigned long bootMillis = 0;
 
 
-String ssid = "ESP32-YOUR NETWORK HERE!!!";
-String password = "12345678";
-String wifi_ssid = "";
-String wifi_password = "";
+String wifi_ssid = "Suri";
+String wifi_password = "suri120223";
 boolean isWifiConnected = false;
 volatile uint8_t button_press_count = 0;
 QueueHandle_t xJsonQueue = NULL;
 SemaphoreHandle_t xI2CMutex = NULL;
+SemaphoreHandle_t xSerialMutex = NULL;
 
 

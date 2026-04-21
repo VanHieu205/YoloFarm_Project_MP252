@@ -14,7 +14,7 @@ typedef struct {
 extern QueueHandle_t xJsonQueue;
 
 extern SemaphoreHandle_t xI2CMutex;
-
+extern SemaphoreHandle_t xSerialMutex;
 extern float glob_temperature;
 extern float glob_humidity;
 extern float glob_light;
@@ -25,8 +25,6 @@ extern bool glob_pump_state;
 
 extern unsigned long bootMillis;
 
-extern String ssid;
-extern String password;
 extern String wifi_ssid;
 extern String wifi_password;
 extern boolean isWifiConnected;
