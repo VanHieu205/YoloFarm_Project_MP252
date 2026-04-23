@@ -9,6 +9,7 @@ void setup()
   Serial.begin(115200);
   xI2CMutex = xSemaphoreCreateMutex();
   xSerialMutex = xSemaphoreCreateMutex();
+  xJsonQueueMutex = xSemaphoreCreateMutex();
   xJsonQueue = xQueueCreate(10, sizeof(JsonMessage));
   xTaskCreate(temp_humi_monitor, "TempHumiMonitor", 4096, NULL, 1, NULL);
   xTaskCreate(light_soil_monitor, "LightSoil_Task", 4096, NULL, 1, NULL);

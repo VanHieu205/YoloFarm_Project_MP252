@@ -3,7 +3,7 @@
 #include <PubSubClient.h>
 #include "global.h"
 
-const char* mqtt_server = "192.168.100.92";
+const char* mqtt_server = "192.168.1.202";
 const int mqtt_port = 1883;
 const char* MQTT_TOPIC_PUB = "yolofarm/telemetry";
 

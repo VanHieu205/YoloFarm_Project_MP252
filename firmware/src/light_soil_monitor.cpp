@@ -6,15 +6,8 @@ void light_soil_monitor(void *pvParameters) {
     pinMode(LDR_PIN, INPUT);
     pinMode(SOIL_MOISTURE_PIN, INPUT);
     pinMode(PUMP_CONTROL_PIN, OUTPUT);
+    pinMode(FAN_CONTROL_PIN, OUTPUT);
     digitalWrite(PUMP_CONTROL_PIN, LOW);
-
-    // if (xSerialMutex != NULL) {
-    //     if (xSemaphoreTake(xSerialMutex, portMAX_DELAY) == pdTRUE) {
-    //         Serial.println("[System] Light & Soil Monitor Task Started.");
-    //         Serial.flush();
-    //         xSemaphoreGive(xSerialMutex);
-    //     }
-    // }
 
     const TickType_t xFrequency = pdMS_TO_TICKS(5000);
     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -22,77 +15,61 @@ void light_soil_monitor(void *pvParameters) {
 
     while (1) {
         int raw_light = analogRead(LDR_PIN);
-        glob_light = (float)raw_light; 
+        glob_light = (float)raw_light;
 
-        int raw_soil = analogRead(SOIL_MOISTURE_PIN);
-        float soil_pct = map(raw_soil, 4095, 0, 0, 100);
+        int raw_soil     = analogRead(SOIL_MOISTURE_PIN);
+        float soil_pct   = map(raw_soil, 4095, 0, 0, 100);
         glob_soil_moisture = constrain(soil_pct, 0.0f, 100.0f);
 
         if (glob_soil_moisture < 40.0f) {
             glob_pump_state = true;
             digitalWrite(PUMP_CONTROL_PIN, HIGH);
-        } else if (glob_soil_moisture > 70.0f) {
-            glob_pump_state = false;
-            digitalWrite(PUMP_CONTROL_PIN, LOW);
-        }
+         } else if (glob_soil_moisture > 70.0f) {
+             glob_pump_state = false;
+             digitalWrite(PUMP_CONTROL_PIN, LOW);
+         }
 
-        JsonDocument sensorDoc; 
+        // --- Build sensor payload ---
+        JsonDocument sensorDoc;
         sensorDoc["device_id"] = "GW-001";
-        sensorDoc["location"] = "Zone 1";
+        sensorDoc["location"]  = "Zone 1";
         JsonObject values = sensorDoc["values"].to<JsonObject>();
         values["light_intensity"] = glob_light;
-        values["soil_moisture"] = glob_soil_moisture;
-
+        values["soil_moisture"]   = glob_soil_moisture;
         String sensorPayload;
         serializeJson(sensorDoc, sensorPayload);
-        
-        String logSensor = "[SENSOR_DATA] " + sensorPayload;
 
-        // if (xSerialMutex != NULL) {
-        //     if (xSemaphoreTake(xSerialMutex, portMAX_DELAY) == pdTRUE) {
-        //         Serial.println(logSensor);
-        //         Serial.flush();
-        //         xSemaphoreGive(xSerialMutex);
-        //     }
-        // }
-
-        if (xJsonQueue != NULL) {
-            JsonMessage msg1;
-            strncpy(msg1.payload, sensorPayload.c_str(), sizeof(msg1.payload) - 1);
-            msg1.payload[sizeof(msg1.payload) - 1] = '\0';
-            xQueueSend(xJsonQueue, &msg1, 0); 
-        }
-
+        // --- Build device payload ---
         JsonDocument deviceDoc;
-        deviceDoc["device_id"] = "PUMP-001";
-        deviceDoc["name"] = "may bom khu a";
-        deviceDoc["type"] = "pump";
+        deviceDoc["device_id"]         = "PUMP-001";
+        deviceDoc["name"]              = "may bom khu a";
+        deviceDoc["type"]              = "pump";
         deviceDoc["connection_status"] = "online";
-        deviceDoc["connection_type"] = "gpio_relay";
-        deviceDoc["parent_id"] = "GW-001";
-        deviceDoc["is_on"] = glob_pump_state;
-        deviceDoc["mode"] = "auto";
-
+        deviceDoc["connection_type"]   = "gpio_relay";
+        deviceDoc["parent_id"]         = "GW-001";
+        deviceDoc["is_on"]             = glob_pump_state;
+        deviceDoc["mode"]              = "auto";
         String devicePayload;
         serializeJson(deviceDoc, devicePayload);
-        
-        String logDevice = "[DEVICE_STATUS] " + devicePayload;
 
-        // if (xSerialMutex != NULL) {
-        //     if (xSemaphoreTake(xSerialMutex, portMAX_DELAY) == pdTRUE) {
-        //         Serial.println(logDevice);
-        //         Serial.flush();
-        //         xSemaphoreGive(xSerialMutex);
-        //     }
-        // }
+        // --- Gửi 2 gói liên tiếp, bảo vệ bằng mutex ---
+        if (xJsonQueue != NULL && xJsonQueueMutex != NULL) {
+            if (xSemaphoreTake(xJsonQueueMutex, pdMS_TO_TICKS(200)) == pdTRUE) {
 
-        if (xJsonQueue != NULL) {
-            JsonMessage msg2;
-            strncpy(msg2.payload, devicePayload.c_str(), sizeof(msg2.payload) - 1);
-            msg2.payload[sizeof(msg2.payload) - 1] = '\0';
-            xQueueSend(xJsonQueue, &msg2, 0); 
+                JsonMessage msg1;
+                strncpy(msg1.payload, sensorPayload.c_str(), sizeof(msg1.payload) - 1);
+                msg1.payload[sizeof(msg1.payload) - 1] = '\0';
+                xQueueSend(xJsonQueue, &msg1, pdMS_TO_TICKS(100));
+
+                JsonMessage msg2;
+                strncpy(msg2.payload, devicePayload.c_str(), sizeof(msg2.payload) - 1);
+                msg2.payload[sizeof(msg2.payload) - 1] = '\0';
+                xQueueSend(xJsonQueue, &msg2, pdMS_TO_TICKS(100));
+
+                xSemaphoreGive(xJsonQueueMutex);
+            }
         }
-       
+
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }

@@ -3,7 +3,7 @@ import json
 import sqlite3
 import datetime
 
-BROKER_IP = "192.168.100.92"
+BROKER_IP = "192.168.1.202"
 TOPIC = "yolofarm/telemetry"
 
 def init_db():

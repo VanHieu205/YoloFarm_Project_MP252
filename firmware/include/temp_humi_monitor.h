@@ -6,5 +6,5 @@
 #include "global.h"
 
 void temp_humi_monitor(void *pvParameters);
-#define LIGHT_RELAY_PIN 9
+#define LIGHT_RELAY_PIN 48
 #endif

@@ -15,6 +15,7 @@ extern QueueHandle_t xJsonQueue;
 
 extern SemaphoreHandle_t xI2CMutex;
 extern SemaphoreHandle_t xSerialMutex;
+extern SemaphoreHandle_t xJsonQueueMutex;
 extern float glob_temperature;
 extern float glob_humidity;
 extern float glob_light;

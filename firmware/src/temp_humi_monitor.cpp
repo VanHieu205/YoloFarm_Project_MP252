@@ -8,21 +8,13 @@ void temp_humi_monitor(void *pvParameters) {
     if (xI2CMutex != NULL) {
         xSemaphoreTake(xI2CMutex, portMAX_DELAY);
         dht20.begin();
-        Wire.begin(11, 12); 
+        Wire.begin(11, 12);
         xSemaphoreGive(xI2CMutex);
     }
 
     pinMode(LIGHT_RELAY_PIN, OUTPUT);
-    digitalWrite(LIGHT_RELAY_PIN, LOW); 
+    digitalWrite(LIGHT_RELAY_PIN, LOW);
 
-    // if (xSerialMutex != NULL) {
-    //     if (xSemaphoreTake(xSerialMutex, portMAX_DELAY) == pdTRUE) {
-    //         Serial.println("[System] Temp & Humi Monitor Task Started.");
-    //         Serial.flush();
-    //         xSemaphoreGive(xSerialMutex);
-    //     }
-    // }
-    
     const TickType_t xFrequency = pdMS_TO_TICKS(5000);
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -56,63 +48,46 @@ void temp_humi_monitor(void *pvParameters) {
             digitalWrite(LIGHT_RELAY_PIN, LOW);
         }
 
+        // --- Build sensor payload ---
         JsonDocument sensorDoc;
         sensorDoc["device_id"] = "GW-001";
-        sensorDoc["location"] = "Zone 1";
+        sensorDoc["location"]  = "Zone 1";
         JsonObject values = sensorDoc["values"].to<JsonObject>();
         values["temperature"] = temperature;
-        values["humidity"] = humidity;
-
+        values["humidity"]    = humidity;
         String sensorPayload;
         serializeJson(sensorDoc, sensorPayload);
-        
-        String logSensor = "[SENSOR_DATA] " + sensorPayload;
 
-        // if (xSerialMutex != NULL) {
-        //     if (xSemaphoreTake(xSerialMutex, portMAX_DELAY) == pdTRUE) {
-        //         Serial.println(logSensor);
-        //         Serial.flush();
-        //         xSemaphoreGive(xSerialMutex);
-        //     }
-        // }
-
-        if (xJsonQueue != NULL) {
-            JsonMessage msg1;
-            strncpy(msg1.payload, sensorPayload.c_str(), sizeof(msg1.payload) - 1);
-            msg1.payload[sizeof(msg1.payload) - 1] = '\0';
-            xQueueSend(xJsonQueue, &msg1, 0); 
-        }
-
+        // --- Build device payload ---
         JsonDocument deviceDoc;
-        deviceDoc["device_id"] = "LAMP-001";
-        deviceDoc["name"] = "den chieu sang khu a";
-        deviceDoc["type"] = "light";
+        deviceDoc["device_id"]         = "LAMP-001";
+        deviceDoc["name"]              = "den chieu sang khu a";
+        deviceDoc["type"]              = "light";
         deviceDoc["connection_status"] = "online";
-        deviceDoc["connection_type"] = "gpio_relay";
-        deviceDoc["parent_id"] = "GW-001";
-        deviceDoc["is_on"] = glob_lamp_state;
-        deviceDoc["mode"] = "auto";
-
+        deviceDoc["connection_type"]   = "gpio_relay";
+        deviceDoc["parent_id"]         = "GW-001";
+        deviceDoc["is_on"]             = glob_lamp_state;
+        deviceDoc["mode"]              = "auto";
         String devicePayload;
         serializeJson(deviceDoc, devicePayload);
-        
-        String logDevice = "[DEVICE_STATUS] " + devicePayload;
 
-        // if (xSerialMutex != NULL) {
-        //     if (xSemaphoreTake(xSerialMutex, portMAX_DELAY) == pdTRUE) {
-        //         Serial.println(logDevice);
-        //         Serial.flush();
-        //         xSemaphoreGive(xSerialMutex);
-        //     }
-        // }
+        if (xJsonQueue != NULL && xJsonQueueMutex != NULL) {
+            if (xSemaphoreTake(xJsonQueueMutex, pdMS_TO_TICKS(200)) == pdTRUE) {
 
-        if (xJsonQueue != NULL) {
-            JsonMessage msg2;
-            strncpy(msg2.payload, devicePayload.c_str(), sizeof(msg2.payload) - 1);
-            msg2.payload[sizeof(msg2.payload) - 1] = '\0';
-            xQueueSend(xJsonQueue, &msg2, 0); 
+                JsonMessage msg1;
+                strncpy(msg1.payload, sensorPayload.c_str(), sizeof(msg1.payload) - 1);
+                msg1.payload[sizeof(msg1.payload) - 1] = '\0';
+                xQueueSend(xJsonQueue, &msg1, pdMS_TO_TICKS(100));
+
+                JsonMessage msg2;
+                strncpy(msg2.payload, devicePayload.c_str(), sizeof(msg2.payload) - 1);
+                msg2.payload[sizeof(msg2.payload) - 1] = '\0';
+                xQueueSend(xJsonQueue, &msg2, pdMS_TO_TICKS(100));
+
+                xSemaphoreGive(xJsonQueueMutex);
+            }
         }
-        
+
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
