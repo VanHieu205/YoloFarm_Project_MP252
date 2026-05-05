@@ -16,6 +16,11 @@ extern QueueHandle_t xJsonQueue;
 extern SemaphoreHandle_t xI2CMutex;
 extern SemaphoreHandle_t xSerialMutex;
 extern SemaphoreHandle_t xJsonQueueMutex;
+
+
+extern unsigned long last_server_cmd_time;
+extern const unsigned long OVERRIDE_TIMEOUT;
+
 extern float glob_temperature;
 extern float glob_humidity;
 extern float glob_light;

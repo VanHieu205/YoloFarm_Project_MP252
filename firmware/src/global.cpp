@@ -1,5 +1,9 @@
 #include "global.h"
 
+
+unsigned long last_server_cmd_time = 0; 
+const unsigned long OVERRIDE_TIMEOUT = 5000;
+
 float glob_temperature = 25 ;
 float glob_humidity = 25;
 float glob_light = 0;
