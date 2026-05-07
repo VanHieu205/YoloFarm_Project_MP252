@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import json
 import datetime
 
-BROKER_IP = "192.168.1.202"
+BROKER_IP =  "broker.hivemq.com"
 
 TOPIC = "yolofarm/telemetry"
 

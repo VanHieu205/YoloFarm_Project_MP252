@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.sensor_routes import router as sensor_router
 from api.farm_management_routes import router as farm_router
+from api.user_routes import router as user_router
+from api.device_routes import router as device_router
 
 app = FastAPI(
     title = "YoloFarm API System",
@@ -18,8 +20,16 @@ app.add_middleware(
     allow_headers = ["*"],
 )
 
+# Đăng ký Route của User
+app.include_router(user_router, prefix = "/api/users", tags = ["Users"])
+
+# Đăng ký Route của Thiết bị
+app.include_router(device_router, prefix = "/api/devices", tags = ["Devices"])
+
 # Đăng ký Route của Cảm biến
 app.include_router(sensor_router, prefix = "/api/sensors", tags = ["Sensors"])
+
+# Đăng ký Route của Farm
 app.include_router(farm_router, prefix="/api/farm", tags=["Farm"])  
 @app.get("/")
 def root():
