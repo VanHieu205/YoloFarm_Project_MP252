@@ -104,3 +104,94 @@ INSERT INTO harvest_yields (crop_id, quantity, unit, quality, notes) VALUES
 (3, 760.20, 'kg', 'Bình thường', 'Ảnh hưởng nhẹ do thời tiết');
 
 -- =============================================
+-- MORE DEVICES
+-- =============================================
+
+INSERT INTO devices VALUES
+('DEV-004','Light 1','light','USR-002','Greenhouse A','online','gpio_relay',1,'auto','v1.0',NOW(),NOW()),
+('DEV-005','Pump 2','pump','USR-002','Field B','online','gpio_relay',1,'auto','v1.0',NOW(),NOW()),
+('DEV-006','Fan 2','fan','USR-002','Greenhouse B','online','gpio_relay',0,'manual','v1.0',NOW(),NOW()),
+('DEV-007','Sensor 2','sensor','USR-002','Field B','online','i2c',1,'auto','v1.0',NOW(),NOW()),
+('DEV-008','Light 2','light','USR-002','Greenhouse B','offline','gpio_relay',0,'manual','v1.0',NOW(),NOW());
+
+-- =============================================
+-- MORE CROPS
+-- =============================================
+
+INSERT INTO crops VALUES
+(2,'USR-002','DEV-007','Lettuce','Romaine','2026-04-20','2026-06-10',35,'growing',NOW()),
+(3,'USR-002','DEV-003','Cucumber','Japanese','2026-04-15','2026-06-25',40,'growing',NOW());
+
+-- =============================================
+-- MORE SENSOR READINGS
+-- =============================================
+
+INSERT INTO sensor_readings VALUES
+('READ-003','DEV-003',1,NOW(),29.5,65,40,650,390,'Field A'),
+('READ-004','DEV-003',1,NOW(),31.2,70,35,720,410,'Field A'),
+('READ-005','DEV-007',2,NOW(),26.4,75,55,500,350,'Field B'),
+('READ-006','DEV-007',2,NOW(),27.1,72,52,480,340,'Field B'),
+('READ-007','DEV-003',3,NOW(),33.5,60,28,800,450,'Greenhouse B'),
+('READ-008','DEV-007',3,NOW(),24.8,80,60,300,320,'Greenhouse B');
+
+-- =============================================
+-- MORE ALERTS
+-- =============================================
+
+INSERT INTO alerts VALUES
+('ALT-002','DEV-007',2,'READ-005','high_humidity','medium','Humidity exceeded threshold',0,NOW()),
+('ALT-003','DEV-003',3,'READ-007','high_temp','critical','Temperature reached dangerous level',0,NOW()),
+('ALT-004','DEV-005',2,NULL,'pump_warning','low','Pump maintenance required',1,NOW());
+
+-- =============================================
+-- MORE AI RECOMMENDATIONS
+-- =============================================
+
+INSERT INTO ai_recommendations VALUES
+('REC-002',2,98,82,
+JSON_ARRAY(
+    JSON_OBJECT('risk_type','fungus','severity','medium','description','Humidity too high')
+),
+NOW()),
+
+('REC-003',3,140,88,
+JSON_ARRAY(
+    JSON_OBJECT('risk_type','heat','severity','high','description','High greenhouse temperature')
+),
+NOW());
+
+-- =============================================
+-- MORE AI ACTIONS
+-- =============================================
+
+INSERT INTO ai_actions VALUES
+(NULL,'REC-002',2,'Reduce watering frequency','Humidity exceeded optimal level','automation'),
+
+(NULL,'REC-003',1,'Activate cooling fans','Temperature exceeded threshold','cooling');
+
+-- =============================================
+-- MORE CARE LOGS
+-- =============================================
+
+INSERT INTO care_logs (crop_id, date, activity, notes) VALUES
+(1, '2026-05-08', 'Tưới nước', 'Tưới tự động lúc sáng'),
+(2, '2026-05-08', 'Bón phân', 'Bón phân hữu cơ'),
+(3, '2026-05-08', 'Kiểm tra sâu bệnh', 'Không phát hiện bất thường');
+
+-- =============================================
+-- MORE SUPPLIES
+-- =============================================
+
+INSERT INTO supplies (crop_id, name, quantity, unit, date) VALUES
+(1, 'Phân hữu cơ', 15, 'kg', '2026-05-08'),
+(2, 'Thuốc trừ sâu', 3, 'lít', '2026-05-08'),
+(3, 'Hạt giống', 10, 'kg', '2026-05-08');
+
+-- =============================================
+-- MORE HARVEST DATA
+-- =============================================
+
+INSERT INTO harvest_yields (crop_id, quantity, unit, quality, notes) VALUES
+(2, 890.50, 'kg', 'Tốt', 'Năng suất ổn định'),
+(3, 1200.75, 'kg', 'Xuất sắc', 'Điều kiện phát triển tốt');
+```
