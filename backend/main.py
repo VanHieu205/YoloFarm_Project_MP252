@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.sensor_routes import router as sensor_router
+from api.farm_management_routes import router as farm_router
 
 app = FastAPI(
     title = "YoloFarm API System",
@@ -19,7 +20,7 @@ app.add_middleware(
 
 # Đăng ký Route của Cảm biến
 app.include_router(sensor_router, prefix = "/api/sensors", tags = ["Sensors"])
-
+app.include_router(farm_router, prefix="/api/farm", tags=["Farm"])  
 @app.get("/")
 def root():
     return {

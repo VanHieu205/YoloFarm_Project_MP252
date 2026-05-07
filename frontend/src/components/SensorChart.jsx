@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { Droplet, Thermometer, Sun } from 'lucide-react'
+import axiosClient from '../api/axiosClient'; 
 
 const SensorChart = () => {
   // Mock data - dữ liệu giả

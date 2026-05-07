@@ -1,4 +1,4 @@
-import SensorChart from "../components/SensorChart";
+import SensorChart from "../components/Monitoringchart";
 
 const Monitoring = () => {
   return (

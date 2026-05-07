@@ -60,3 +60,47 @@ NOW());
 -- =============================================
 INSERT INTO ai_actions VALUES
 (NULL,'REC-001',1,'Irrigate for 30 minutes','High temperature forecast','schedule');
+-- =============================================
+-- Farm management
+-- =============================================
+
+INSERT INTO care_logs (crop_id, date, activity, notes) VALUES
+(1, '2026-05-01', 'Tưới nước', 'Tưới tự động buổi sáng'),
+(1, '2026-05-03', 'Bón phân', 'Bón phân NPK lần 1'),
+(1, '2026-05-05', 'Kiểm tra sâu bệnh', 'Phát hiện ít sâu lá'),
+
+(2, '2026-05-02', 'Tưới nước', 'Độ ẩm đất thấp'),
+(2, '2026-05-04', 'Phun thuốc', 'Phòng ngừa nấm bệnh'),
+(2, '2026-05-06', 'Cắt tỉa lá', 'Loại bỏ lá úa'),
+
+(3, '2026-05-01', 'Bón phân hữu cơ', 'Bổ sung dinh dưỡng'),
+(3, '2026-05-03', 'Tưới nước', 'Tưới nhẹ vào chiều tối'),
+(3, '2026-05-07', 'Kiểm tra sinh trưởng', 'Cây phát triển tốt');
+
+
+
+-- DỮ LIỆU SUPPLIES
+
+
+INSERT INTO supplies (crop_id, name, quantity, unit, date) VALUES
+(1, 'Phân NPK', 25.5, 'kg', '2026-05-03'),
+(1, 'Thuốc trừ sâu', 2.0, 'lít', '2026-05-05'),
+(1, 'Hạt giống', 5.0, 'kg', '2026-04-20'),
+
+(2, 'Phân hữu cơ', 30.0, 'kg', '2026-05-02'),
+(2, 'Thuốc nấm', 1.5, 'lít', '2026-05-04'),
+(2, 'Dung dịch vi sinh', 10.0, 'lít', '2026-05-06'),
+
+(3, 'Phân kali', 18.0, 'kg', '2026-05-01'),
+(3, 'Thuốc kích rễ', 3.0, 'lít', '2026-05-03'),
+(3, 'Hệ thống tưới', 1.0, 'bộ', '2026-04-28');
+
+
+-- DỮ LIỆU HARVEST YIELDS
+
+INSERT INTO harvest_yields (crop_id, quantity, unit, quality, notes) VALUES
+(1, 1250.50, 'kg', 'Tốt', 'Sản lượng ổn định, chất lượng đồng đều'),
+(2, 980.75, 'kg', 'Xuất sắc', 'Năng suất cao hơn dự kiến'),
+(3, 760.20, 'kg', 'Bình thường', 'Ảnh hưởng nhẹ do thời tiết');
+
+-- =============================================

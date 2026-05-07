@@ -167,7 +167,43 @@ CREATE TABLE ai_actions (
         REFERENCES ai_recommendations(recommendation_id)
         ON DELETE CASCADE
 );
+-- =============================================
+-- 11. Farm management
+-- =============================================
+-- Nhật ký chăm sóc
+CREATE TABLE care_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    crop_id INT NOT NULL,
+    date DATE NOT NULL,
+    activity VARCHAR(100) NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (crop_id) REFERENCES crops(crop_id) ON DELETE CASCADE
+);
 
+-- Vật tư / phân bón
+CREATE TABLE supplies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    crop_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    quantity DECIMAL(10,2),
+    unit VARCHAR(20),
+    date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (crop_id) REFERENCES crops(crop_id) ON DELETE CASCADE
+);
+
+-- Sản lượng thu hoạch
+CREATE TABLE harvest_yields (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    crop_id INT NOT NULL UNIQUE,
+    quantity DECIMAL(10,2),
+    unit VARCHAR(20),
+    quality ENUM('Xuất sắc','Tốt','Bình thường','Thấp') DEFAULT 'Bình thường',
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (crop_id) REFERENCES crops(crop_id) ON DELETE CASCADE
+);
 -- =============================================
 -- INDEXES
 -- =============================================

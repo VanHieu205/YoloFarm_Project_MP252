@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import React, { useEffect, useState } from "react";
 import { Plus, Edit2, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { FaSeedling, FaList, FaBox, FaLeaf, FaDroplet, FaSprayCan, FaScissors, FaChartColumn, FaStar, FaClipboard, FaRuler, FaCalendarDays } from 'react-icons/fa6'
 import '../styles/components.css'
-
+import axiosClient from "../api/axiosClient"
+const USER_ID = "USR-002"      // thay bằng id từ auth context
+const DEVICE_ID = "DEV-001"  // thay bằng device thực tế
 const FarmManagement = () => {
   // Helper function to render activity with icon
   const getActivityIcon = (activityName) => {
@@ -14,41 +16,34 @@ const FarmManagement = () => {
     }
     return icons[activityName] || null
   }
-  const [seasons, setSeasons] = useState([
-    {
-      id: 1,
-      cropName: 'Lúa',
-      plantDate: '2024-01-15',
-      harvestDate: '2024-05-15',
-      area: 2.5,
-      notes: 'Sử dụng giống lúa chất lượng cao',
-      status: 'Đang trồng',
-      careLog: [
-        { date: '2024-01-20', activity: 'Tưới nước', notes: 'Tưới đều' },
-        { date: '2024-02-10', activity: 'Bón phân', notes: 'Bón phân NPK' },
-      ],
-      supplies: [
-        { id: 1, name: 'Phân NPK', quantity: 50, unit: 'kg', date: '2024-01-20' },
-        { id: 2, name: 'Thuốc trừ sâu', quantity: 10, unit: 'lít', date: '2024-02-10' },
-      ],
-      yield: null,
-    },
-    {
-      id: 2,
-      cropName: 'Ngô',
-      plantDate: '2024-02-01',
-      harvestDate: '2024-06-01',
-      area: 1.8,
-      notes: 'Giống ngô lai F1',
-      status: 'Chuẩn bị',
-      careLog: [],
-      supplies: [],
-      yield: null,
-    },
-  ])
-
-  const [selectedSeason, setSelectedSeason] = useState(seasons[0])
-  const [expandedSeasons, setExpandedSeasons] = useState([seasons[0].id])
+  const [seasons, setSeasons] = useState([])
+  const [loading, setLoading] = useState(true)
+   useEffect(() => {
+    axiosClient.get(`/api/farm/crops?user_id=${USER_ID}`)
+      .then(res => {
+        // Map field DB → field component
+        const mapped = res.data.map(c => ({
+          id:          c.crop_id,
+          cropName:    c.crop_name,
+          plantDate:   c.plant_date,
+          harvestDate: c.expected_harvest_date,
+          area:        c.area,
+          notes:       c.notes ?? "",
+          status:      c.status === "growing"   ? "Đang trồng"
+                     : c.status === "harvested" ? "Đã thu hoạch"
+                     :                            "Chuẩn bị",
+          careLog:  (c.careLog  ?? []).map(l => ({ ...l, id: l.id })),
+          supplies: (c.supplies ?? []).map(s => ({ ...s })),
+          yield:    c.yield ?? null,
+        }))
+        setSeasons(mapped)
+        if (mapped.length) setSelectedSeason(mapped[0])
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
+  const [selectedSeason, setSelectedSeason] = useState(null)
+  const [expandedSeasons, setExpandedSeasons] = useState([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [showCareForm, setShowCareForm] = useState(false)
   const [showSupplyForm, setShowSupplyForm] = useState(false)
@@ -94,98 +89,91 @@ const FarmManagement = () => {
     }
   }
 
-  const addSeason = () => {
-    const season = {
-      id: Math.max(...seasons.map((s) => s.id), 0) + 1,
-      ...newSeason,
-      careLog: [],
-      supplies: [],
-      yield: null,
-      status: 'Chuẩn bị',
+const addSeason = async () => {
+    const res = await axiosClient.post("/api/farm/crops", {
+      user_id:                USER_ID,
+      device_id:              DEVICE_ID,
+      crop_name:              newSeason.cropName,
+      plant_date:             newSeason.plantDate,
+      expected_harvest_date:  newSeason.harvestDate,
+      area:                   parseFloat(newSeason.area),
+      notes:                  newSeason.notes,
+    })
+    const created = {
+      id:          res.data.crop_id,
+      cropName:    res.data.crop_name,
+      plantDate:   res.data.plant_date,
+      harvestDate: res.data.expected_harvest_date,
+      area:        res.data.area,
+      notes:       res.data.notes ?? "",
+      status:      "Chuẩn bị",
+      careLog: [], supplies: [], yield: null,
     }
-    setSeasons([...seasons, season])
-    setSelectedSeason(season)
-    setExpandedSeasons([...expandedSeasons, season.id])
-    setNewSeason({ cropName: '', plantDate: '', harvestDate: '', area: '', notes: '' })
+    setSeasons(prev => [...prev, created])
+    setSelectedSeason(created)
+    setNewSeason({ cropName: "", plantDate: "", harvestDate: "", area: "", notes: "" })
     setShowAddForm(false)
   }
 
-  const deleteSeason = (id) => {
-    const newSeasons = seasons.filter((s) => s.id !== id)
-    setSeasons(newSeasons)
-    if (selectedSeason.id === id) {
-      setSelectedSeason(newSeasons[0])
-    }
+    const deleteSeason = async (id) => {
+    await axiosClient.delete(`/api/farm/crops/${id}`)
+    const next = seasons.filter(s => s.id !== id)
+    setSeasons(next)
+    if (selectedSeason?.id === id) setSelectedSeason(next[0] ?? null)
   }
 
-  const addCareLog = () => {
-    const updated = seasons.map((s) =>
-      s.id === selectedSeason.id
-        ? {
-            ...s,
-            careLog: [
-              ...s.careLog,
-              {
-                ...newCareLog,
-                id: Math.random(),
-              },
-            ],
-          }
-        : s
+   const addCareLog = async () => {
+    const res = await axiosClient.post(
+      `/api/farm/crops/${selectedSeason.id}/care-logs`,
+      newCareLog
     )
+    const updater = s => s.id === selectedSeason.id
+      ? { ...s, careLog: [...s.careLog, res.data] }
+      : s
+    const updated = seasons.map(updater)
     setSeasons(updated)
-    setSelectedSeason(updated.find((s) => s.id === selectedSeason.id))
-    setNewCareLog({ date: new Date().toISOString().split('T')[0], activity: '', notes: '' })
+    setSelectedSeason(updated.find(s => s.id === selectedSeason.id))
+    setNewCareLog({ date: new Date().toISOString().split("T")[0], activity: "", notes: "" })
     setShowCareForm(false)
   }
 
-  const addSupply = () => {
-    const updated = seasons.map((s) =>
-      s.id === selectedSeason.id
-        ? {
-            ...s,
-            supplies: [
-              ...s.supplies,
-              {
-                id: Math.max(...s.supplies.map((sp) => sp.id || 0), 0) + 1,
-                ...newSupply,
-              },
-            ],
-          }
-        : s
+const addSupply = async () => {
+    const res = await axiosClient.post(
+      `/api/farm/crops/${selectedSeason.id}/supplies`,
+      newSupply
     )
+    const updater = s => s.id === selectedSeason.id
+      ? { ...s, supplies: [...s.supplies, res.data] }
+      : s
+    const updated = seasons.map(updater)
     setSeasons(updated)
-    setSelectedSeason(updated.find((s) => s.id === selectedSeason.id))
-    setNewSupply({ name: '', quantity: '', unit: 'kg', date: new Date().toISOString().split('T')[0] })
+    setSelectedSeason(updated.find(s => s.id === selectedSeason.id))
+    setNewSupply({ name: "", quantity: "", unit: "kg", date: new Date().toISOString().split("T")[0] })
     setShowSupplyForm(false)
   }
 
-  const deleteSupply = (supplyId) => {
-    const updated = seasons.map((s) =>
-      s.id === selectedSeason.id
-        ? {
-            ...s,
-            supplies: s.supplies.filter((sp) => sp.id !== supplyId),
-          }
-        : s
-    )
+  const deleteSupply = async (supplyId) => {
+    await axiosClient.delete(`/api/farm/crops/${selectedSeason.id}/supplies/${supplyId}`)
+    const updater = s => s.id === selectedSeason.id
+      ? { ...s, supplies: s.supplies.filter(sp => sp.id !== supplyId) }
+      : s
+    const updated = seasons.map(updater)
     setSeasons(updated)
-    setSelectedSeason(updated.find((s) => s.id === selectedSeason.id))
+    setSelectedSeason(updated.find(s => s.id === selectedSeason.id))
   }
 
-  const addYield = () => {
-    const updated = seasons.map((s) =>
-      s.id === selectedSeason.id
-        ? {
-            ...s,
-            yield: yieldData,
-            status: 'Đã thu hoạch',
-          }
-        : s
+   const addYield = async () => {
+    await axiosClient.post(
+      `/api/farm/crops/${selectedSeason.id}/yield`,
+      yieldData
     )
+    const updater = s => s.id === selectedSeason.id
+      ? { ...s, yield: yieldData, status: "Đã thu hoạch" }
+      : s
+    const updated = seasons.map(updater)
     setSeasons(updated)
-    setSelectedSeason(updated.find((s) => s.id === selectedSeason.id))
-    setYieldData({ quantity: '', unit: 'kg', quality: 'Bình thường', notes: '' })
+    setSelectedSeason(updated.find(s => s.id === selectedSeason.id))
+    setYieldData({ quantity: "", unit: "kg", quality: "Bình thường", notes: "" })
     setShowYieldForm(false)
   }
 
@@ -194,12 +182,15 @@ const FarmManagement = () => {
     setEditingSeasonInfo(true)
   }
 
-  const saveEditSeason = () => {
-    const updated = seasons.map((s) =>
-      s.id === selectedSeason.id
-        ? editSeasonData
-        : s
-    )
+ const saveEditSeason = async () => {
+    await axiosClient.put(`/api/farm/crops/${selectedSeason.id}`, {
+      crop_name:             editSeasonData.cropName,
+      plant_date:            editSeasonData.plantDate,
+      expected_harvest_date: editSeasonData.harvestDate,
+      area:                  parseFloat(editSeasonData.area),
+      notes:                 editSeasonData.notes,
+    })
+    const updated = seasons.map(s => s.id === selectedSeason.id ? editSeasonData : s)
     setSeasons(updated)
     setSelectedSeason(editSeasonData)
     setEditingSeasonInfo(false)
