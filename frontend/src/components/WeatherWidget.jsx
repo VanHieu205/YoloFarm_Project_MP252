@@ -1,24 +1,93 @@
+import { useEffect, useState } from 'react'
 import { Cloud, CloudRain, Wind, Eye } from 'lucide-react'
+import axiosClient from '../api/axiosClient'
 
 const WeatherWidget = () => {
-  // Mock weather data - dữ liệu thời tiết giả
-  const weatherData = {
-    location: 'Hà Nội, Việt Nam',
-    current: {
-      temp: 28,
-      condition: 'Hửng nắng',
-      humidity: 65,
-      windSpeed: 3.2,
-      visibility: 10,
-      feelsLike: 30,
-      uvIndex: 6,
-      pressure: 1013,
-    },
-    forecast: [
-      { day: 'Hôm nay', high: 32, low: 24, condition: '☀️ Nắng' },
-      { day: 'Ngày mai', high: 30, low: 23, condition: '⛅ Hửng nắng' },
-      { day: 'Ngày kia', high: 28, low: 22, condition: '🌧️ Mưa' },
-    ],
+  const [weatherData, setWeatherData] = useState(null)
+  const [forecastData, setForecastData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    loadWeatherData()
+  }, [])
+  const [city, setCity] = useState('Ho Chi Minh')
+  const loadWeatherData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Fetch current weather
+      const currentRes = await axiosClient.get(
+        `/api/weather/current?city=${city}`
+      )
+      // Fetch forecast
+      const forecastRes = await axiosClient.get(
+        `/api/weather/forecast?city=${city}&days=3`
+      )
+
+      setWeatherData({
+        location: `${currentRes.data.city}, ${currentRes.data.country}`,
+        current: {
+          temp: Math.round(currentRes.data.temperature),
+          condition: currentRes.data.description,
+          humidity: currentRes.data.humidity,
+          windSpeed: currentRes.data.wind_speed,
+          visibility: currentRes.data.visibility,
+          feelsLike: Math.round(currentRes.data.feels_like),
+          uvIndex: currentRes.data.uv_index,
+          iconUrl: currentRes.data.icon_url,
+        },
+      })
+
+      // Transform forecast data
+      const forecast = forecastRes.data.forecast.map((day, index) => ({
+        day: index === 0 ? 'Hôm nay' : index === 1 ? 'Ngày mai' : 'Ngày kia',
+        high: day.temp_max,
+        low: day.temp_min,
+        condition: day.description,
+        iconUrl: day.icon_url,
+      }))
+
+      setForecastData(forecast)
+    } catch (err) {
+      console.error('Weather API Error:', err)
+      setError('Không tải được dữ liệu thời tiết')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title">
+            <span>🌤️</span>
+            Thông tin Thời tiết
+          </div>
+        </div>
+        <div style={{ padding: 'var(--spacing-lg)', textAlign: 'center' }}>
+          Đang tải dữ liệu thời tiết...
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !weatherData || !forecastData) {
+    return (
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title">
+            <span>🌤️</span>
+            Thông tin Thời tiết
+          </div>
+        </div>
+        <div style={{ padding: 'var(--spacing-lg)', textAlign: 'center', color: 'red' }}>
+          {error || 'Không tải được dữ liệu thời tiết'}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -58,16 +127,28 @@ const WeatherWidget = () => {
           }}
         >
           <div>
+            {/* Weather Icon */}
+            <img
+              src={weatherData.current.iconUrl}
+              alt={weatherData.current.condition}
+              style={{
+                width: '80px',
+                height: '80px',
+                marginBottom: '8px',
+              }}
+            />
+            
             <div style={{ fontSize: '48px', fontWeight: '700' }}>
               {weatherData.current.temp}°C
             </div>
-            <div style={{ fontSize: '16px', opacity: 0.9 }}>
+            <div style={{ fontSize: '16px', opacity: 0.9, textTransform: 'capitalize' }}>
               {weatherData.current.condition}
             </div>
             <div style={{ fontSize: '12px', opacity: 0.8 }}>
               Cảm thấy như {weatherData.current.feelsLike}°C
             </div>
           </div>
+
           <div
             style={{
               display: 'grid',
@@ -82,18 +163,21 @@ const WeatherWidget = () => {
                 {weatherData.current.humidity}%
               </div>
             </div>
+
             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px', borderRadius: '8px' }}>
               <div style={{ opacity: 0.8, marginBottom: '4px' }}>Gió</div>
               <div style={{ fontSize: '16px', fontWeight: '600' }}>
                 {weatherData.current.windSpeed} m/s
               </div>
             </div>
+
             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px', borderRadius: '8px' }}>
               <div style={{ opacity: 0.8, marginBottom: '4px' }}>Tầm nhìn</div>
               <div style={{ fontSize: '16px', fontWeight: '600' }}>
                 {weatherData.current.visibility} km
               </div>
             </div>
+
             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px', borderRadius: '8px' }}>
               <div style={{ opacity: 0.8, marginBottom: '4px' }}>UV Index</div>
               <div style={{ fontSize: '16px', fontWeight: '600' }}>
@@ -116,7 +200,7 @@ const WeatherWidget = () => {
             gap: 'var(--spacing-md)',
           }}
         >
-          {weatherData.forecast.map((forecast, index) => (
+          {forecastData.map((forecast, index) => (
             <div
               key={index}
               style={{
@@ -130,9 +214,22 @@ const WeatherWidget = () => {
               <div style={{ fontWeight: '600', marginBottom: '8px' }}>
                 {forecast.day}
               </div>
-              <div style={{ fontSize: '20px', marginBottom: '8px' }}>
+
+              {/* Weather Icon */}
+              <img
+                src={forecast.iconUrl}
+                alt={forecast.condition}
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  margin: '0 auto 8px',
+                }}
+              />
+
+              <div style={{ fontSize: '14px', marginBottom: '8px', textTransform: 'capitalize' }}>
                 {forecast.condition}
               </div>
+
               <div style={{ display: 'flex', justifyContent: 'space-around', fontSize: '14px' }}>
                 <div>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Cao</div>

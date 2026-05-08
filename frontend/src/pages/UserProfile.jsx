@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { User, Lock, Building2, Bell, Save, Eye, EyeOff, Mail, Phone, MapPin, Leaf, Ruler, Calendar, RefreshCw, Bug, Wheat, Cloud } from 'lucide-react'
 import { FaUser, FaRuler, FaMapMarkerAlt, FaSeedling } from 'react-icons/fa'
 import '../styles/components.css'
+import axiosClient from "../api/axiosClient"
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState('personal')
@@ -10,14 +11,17 @@ const UserProfile = () => {
     new: false,
     confirm: false,
   })
-
+  const user = JSON.parse(localStorage.getItem("user"))
+  // Get user_id from localStorage
+  const userId = user?.user_id
   // Personal Info State
   const [personalInfo, setPersonalInfo] = useState({
-    fullName: 'Nguyễn Văn A',
-    email: 'admin@smartfarm.com',
-    phone: '0987654321',
+    fullName: '',
+    email: '',
+    phone: '',
     avatar: null
   })
+  const [loadingPersonal, setLoadingPersonal] = useState(false)
 
   // Farm Info State
   const [farmInfo, setFarmInfo] = useState({
@@ -48,6 +52,36 @@ const UserProfile = () => {
   const [editingPersonal, setEditingPersonal] = useState(false)
   const [editingFarm, setEditingFarm] = useState(false)
 
+  // Fetch user profile on component mount
+  useEffect(() => {
+    fetchUserProfile()
+  }, [])
+
+  const fetchUserProfile = async () => {
+    if (!userId) {
+      console.error('User ID not found in localStorage')
+      return
+    }
+
+    setLoadingPersonal(true)
+    try {
+      const response = await axiosClient.get(`api/users/profile/${userId}`)
+      if (response.data) {
+        setPersonalInfo({
+          fullName: response.data.full_name || '',
+          email: response.data.email || '',
+          phone: response.data.phone || '',
+          avatar: null
+        })
+      }
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error)
+      alert('Không thể tải thông tin người dùng')
+    } finally {
+      setLoadingPersonal(false)
+    }
+  }
+
   // Handlers
   const handlePersonalChange = (field, value) => {
     setPersonalInfo({ ...personalInfo, [field]: value })
@@ -68,14 +102,33 @@ const UserProfile = () => {
     })
   }
 
-  const savePersonalInfo = () => {
-    // TODO: API call to save personal info
-    alert('Lưu thông tin cá nhân thành công!')
-    setEditingPersonal(false)
+  const savePersonalInfo = async () => {
+    if (!userId) {
+      alert('User ID không tìm thấy')
+      return
+    }
+
+    setLoadingPersonal(true)
+    try {
+      const response = await axiosClient.put(`api/users/profile/${userId}`, {
+        full_name: personalInfo.fullName,
+        phone: personalInfo.phone
+      })
+      
+      if (response.data && response.data.success) {
+        alert('Lưu thông tin cá nhân thành công!')
+        setEditingPersonal(false)
+      }
+    } catch (error) {
+      console.error('Failed to save personal info:', error)
+      alert('Lưu thông tin thất bại: ' + (error.response?.data?.detail || error.message))
+    } finally {
+      setLoadingPersonal(false)
+    }
   }
 
   const saveFarmInfo = () => {
-    // TODO: API call to save farm info
+    // TODO: API call to save farm info - Backend API chưa được cấp
     alert('Lưu thông tin trang trại thành công!')
     setEditingFarm(false)
   }
@@ -89,7 +142,7 @@ const UserProfile = () => {
       alert('Mật khẩu mới không khớp!')
       return
     }
-    // TODO: API call to change password
+    // TODO: API call to change password - Backend API chưa được cấp
     alert('Đổi mật khẩu thành công!')
     setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
   }

@@ -4,6 +4,7 @@ from api.sensor_routes import router as sensor_router
 from api.farm_management_routes import router as farm_router
 from api.user_routes import router as user_router
 from api.device_routes import router as device_router
+from api.weather_routes import router as weather_router
 
 app = FastAPI(
     title = "YoloFarm API System",
@@ -28,6 +29,8 @@ app.include_router(device_router, prefix = "/api/devices", tags = ["Devices"])
 
 # Đăng ký Route của Cảm biến
 app.include_router(sensor_router, prefix = "/api/sensors", tags = ["Sensors"])
+
+app.include_router(weather_router, prefix="/api/weather", tags=["Weather"])
 
 # Đăng ký Route của Farm
 app.include_router(farm_router, prefix="/api/farm", tags=["Farm"])  
