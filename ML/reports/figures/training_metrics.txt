@@ -3,14 +3,14 @@ Train Samples :      33353 samples
 Test Samples  :       8339 samples
 
 [ EVALUATION METRICS ]
-R^2 Train      :     0.6639
+R^2 Train      :     0.6659
 R^2 Test       :     0.6645
-Gap Difference :     0.0006
+Gap Difference :     0.0014
 
 ----------------------------------------------------
 
-MAE (Test)     :     0.4457
-RMSE (Test)    :     0.6941
+MAE (Test)     :     0.1764
+RMSE (Test)    :     0.2391
 
 [ MODEL CONFIGURATION ]
 Algorithm      : Random Forest Regressor

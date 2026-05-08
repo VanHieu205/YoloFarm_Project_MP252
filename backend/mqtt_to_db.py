@@ -64,7 +64,7 @@ client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
 client.on_connect = on_connect
 client.on_message = on_message
 
-print(f"Đang kết nối tới Broker {MQTT_BROKER}...")
+print(f"Đang kết nối tới Broker {MQTT_BROKER}")
 try:
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
     client.loop_forever()

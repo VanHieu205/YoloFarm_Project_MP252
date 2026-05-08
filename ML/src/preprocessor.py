@@ -1,6 +1,7 @@
 import pandas as pd
 import joblib
 import os
+import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 def remove_outliers(df, column_name):
@@ -25,6 +26,11 @@ def clean_and_prepare_data(df, models_dir):
     target_col = 'Yield'
     df_clean[target_col] = df_clean['Production'] / df_clean['Area']
     df_clean = remove_outliers(df_clean, 'Yield')
+    
+    df_clean['Temp_Humid_Index'] = df_clean['Temperature'] * df_clean['Humidity']
+    df_clean['Soil_Temp_Ratio'] = df_clean['Soil_Moisture'] / (df_clean['Temperature'] + 1)
+    df_clean['Yield'] = np.log1p(df_clean['Yield'])
+    
     if 'Season' in df_clean.columns:
         df_clean['Season'] = df_clean['Season'].str.strip()
 
