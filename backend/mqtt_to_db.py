@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
 import time
+import uuid
 from core.database import get_connection, close_connection
 from core.config import settings
 
@@ -28,15 +29,16 @@ def on_message(client, userdata, msg):
         # 2. Mở kết nối tới MySQL thông qua Connection Pool
         connect = get_connection()
         cursor = connect.cursor()
-
+        reading_id = f"READ-{uuid.uuid4().hex[:8].upper()}"
         # 3. Chuẩn bị câu lệnh SQL (Dùng device_id từ payload hoặc mặc định là 1)
         query = """
             INSERT INTO sensor_readings
-            (device_id, temperature, humidity, soil_moisture, light_intensity, co2, location, crop_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            (reading_id, device_id, temperature, humidity, soil_moisture, light_intensity, co2, location, crop_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         values = (
+            reading_id,
             payload.get("device_id", 1),
             payload.get("temperature"),
             payload.get("humidity"),
