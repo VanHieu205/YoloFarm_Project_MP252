@@ -6,7 +6,8 @@ import axiosClient from "../api/axiosClient"
 // =============================================
 // CONFIG
 // =============================================
-const USER_ID = 'user_demo_001' // TODO: thay bằng user từ auth context
+const user = JSON.parse(localStorage.getItem("user"))
+const USER_ID = user?.user_id
 
 const TYPE_META = {
   light:   { name: 'Đèn',      Icon: FaLightbulb,  color: '#f59e0b' },
