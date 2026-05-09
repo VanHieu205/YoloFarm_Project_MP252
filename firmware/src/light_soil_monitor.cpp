@@ -23,6 +23,7 @@ void light_soil_monitor(void *pvParameters)
         float soil_pct = map(raw_soil, 4095, 0, 0, 100);
         glob_soil_moisture = constrain(soil_pct, 0.0f, 100.0f);
         String currentmode = "auto";
+        
         if (millis() - last_server_cmd_time >= OVERRIDE_TIMEOUT)
         {
             if (glob_soil_moisture < 40.0f)
@@ -36,39 +37,36 @@ void light_soil_monitor(void *pvParameters)
                 digitalWrite(PUMP_CONTROL_PIN, LOW);
             }
         }
-        else{
+        else
+        {
             currentmode = "manual";
         }
 
-        // --- Build sensor payload ---
         JsonDocument sensorDoc;
-        sensorDoc["device_id"] = "GW-001";
-        sensorDoc["location"] = "Zone 1";
-        JsonObject values = sensorDoc["values"].to<JsonObject>();
-        values["light_intensity"] = glob_light;
-        values["soil_moisture"] = glob_soil_moisture;
+        sensorDoc["device_id"] = "DEV-003";
+        sensorDoc["location"] = "Vườn mẫu";
+        sensorDoc["crop_id"] = 1;
+        sensorDoc["light_intensity"] = glob_light;
+        sensorDoc["soil_moisture"] = glob_soil_moisture;
         String sensorPayload;
         serializeJson(sensorDoc, sensorPayload);
 
-        // --- Build device payload ---
         JsonDocument deviceDoc;
         deviceDoc["device_id"] = "PUMP-001";
-        deviceDoc["name"] = "may bom khu a";
+        deviceDoc["name"] = "may bom 1";
         deviceDoc["type"] = "pump";
         deviceDoc["connection_status"] = "online";
         deviceDoc["connection_type"] = "gpio_relay";
-        deviceDoc["parent_id"] = "GW-001";
+        deviceDoc["parent_id"] = "DEV-003";
         deviceDoc["is_on"] = glob_pump_state;
         deviceDoc["mode"] = currentmode;
         String devicePayload;
         serializeJson(deviceDoc, devicePayload);
 
-        // --- Gửi 2 gói liên tiếp, bảo vệ bằng mutex ---
         if (xJsonQueue != NULL && xJsonQueueMutex != NULL)
         {
             if (xSemaphoreTake(xJsonQueueMutex, pdMS_TO_TICKS(200)) == pdTRUE)
             {
-
                 JsonMessage msg1;
                 strncpy(msg1.payload, sensorPayload.c_str(), sizeof(msg1.payload) - 1);
                 msg1.payload[sizeof(msg1.payload) - 1] = '\0';

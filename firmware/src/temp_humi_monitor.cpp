@@ -46,6 +46,7 @@ void temp_humi_monitor(void *pvParameters)
         glob_temperature = temperature;
         glob_humidity = humidity;
         String currentmode = "auto";
+        
         if (millis() - last_server_cmd_time >= OVERRIDE_TIMEOUT)
         {
             if (temperature >= 35.0f && !sensorError)
@@ -59,28 +60,27 @@ void temp_humi_monitor(void *pvParameters)
                 digitalWrite(LIGHT_RELAY_PIN, LOW);
             }
         }
-        else{
-            currentmode = "maual";
+        else
+        {
+            currentmode = "manual";
         }
 
-        // --- Build sensor payload ---
         JsonDocument sensorDoc;
-        sensorDoc["device_id"] = "GW-001";
-        sensorDoc["location"] = "Zone 1";
-        JsonObject values = sensorDoc["values"].to<JsonObject>();
-        values["temperature"] = temperature;
-        values["humidity"] = humidity;
+        sensorDoc["device_id"] = "DEV-003";
+        sensorDoc["location"] = "Vườn mẫu";
+        sensorDoc["crop_id"] = 1;
+        sensorDoc["temperature"] = temperature;
+        sensorDoc["humidity"] = humidity;
         String sensorPayload;
         serializeJson(sensorDoc, sensorPayload);
 
-        // --- Build device payload ---
         JsonDocument deviceDoc;
         deviceDoc["device_id"] = "LAMP-001";
         deviceDoc["name"] = "den chieu sang khu a";
         deviceDoc["type"] = "light";
         deviceDoc["connection_status"] = "online";
         deviceDoc["connection_type"] = "gpio_relay";
-        deviceDoc["parent_id"] = "GW-001";
+        deviceDoc["parent_id"] = "DEV-003";
         deviceDoc["is_on"] = glob_lamp_state;
         deviceDoc["mode"] = currentmode;
         String devicePayload;
@@ -90,7 +90,6 @@ void temp_humi_monitor(void *pvParameters)
         {
             if (xSemaphoreTake(xJsonQueueMutex, pdMS_TO_TICKS(200)) == pdTRUE)
             {
-
                 JsonMessage msg1;
                 strncpy(msg1.payload, sensorPayload.c_str(), sizeof(msg1.payload) - 1);
                 msg1.payload[sizeof(msg1.payload) - 1] = '\0';

@@ -1,0 +1,17 @@
+
+## Cài đặt PlatformIO
+
+Cài đặt extension PlatformIO thông qua VSCode Extension Marketplace:
+
+- https://platformio.org/install
+
+Hoặc tìm kiếm **PlatformIO IDE** trong tab Extensions của Visual Studio Code.
+
+---
+
+## Build Project
+
+Mở **PlatformIO Core CLI** và chạy lệnh:
+
+```bash
+pio run
