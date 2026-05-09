@@ -9,6 +9,7 @@
 
 typedef struct {
     char payload[256]; 
+    char topic[256];
 } JsonMessage;
 
 extern QueueHandle_t xJsonQueue;
