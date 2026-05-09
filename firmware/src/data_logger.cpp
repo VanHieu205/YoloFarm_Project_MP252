@@ -8,7 +8,7 @@
 #include "temp_humi_monitor.h"
 
 //const char *mqtt_server = "broker.hivemq.com";
-const char *mqtt_server = "10.229.207.236";
+const char *mqtt_server = "broker.hivemq.com";
 const int mqtt_port = 1883;
 const char *MQTT_TOPIC_PUB = "yolofarm/sensors";
 

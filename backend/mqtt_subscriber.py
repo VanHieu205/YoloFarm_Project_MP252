@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
 import datetime
+from core.config import settings
 
 BROKER_IP =  "broker.hivemq.com"
 

@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\backend",
+    "\\backend\\api",
+    "\\frontend",
+    "\\frontend\\src",
+    "\\frontend\\src\\api",
+    "\\frontend\\src\\assets",
+    "\\frontend\\src\\components",
+    "\\frontend\\src\\pages"
+  ],
+  "SelectedNode": "\\frontend\\src\\pages\\report.jsx",
+  "PreviewInSolutionExplorer": false
+}
