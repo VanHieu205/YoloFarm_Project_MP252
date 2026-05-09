@@ -26,10 +26,18 @@ def on_message(client, userdata, msg):
         payload = json.loads(msg.payload.decode())
         print(f"Nhận được dữ liệu mới: {payload}")
 
+        # Kiểm tra dữ liệu không null
+        required_fields = ["temperature", "humidity", "soil_moisture"]
+
+        if any(payload.get(field) is None for field in required_fields):
+            print(f"Bỏ qua bản ghi lỗi (chứa null): {payload}")
+            return
+
         # 2. Mở kết nối tới MySQL thông qua Connection Pool
         connect = get_connection()
         cursor = connect.cursor()
         reading_id = f"READ-{uuid.uuid4().hex[:8].upper()}"
+
         # 3. Chuẩn bị câu lệnh SQL (Dùng device_id từ payload hoặc mặc định là 1)
         query = """
             INSERT INTO sensor_readings
