@@ -1,19 +1,27 @@
 [ DATA INFORMATION ]
 Train Samples :      33353 samples
 Test Samples  :       8339 samples
+Features      :          7 features
+====================================================
 
-[ EVALUATION METRICS ]
-R^2 Train      :     0.6659
-R^2 Test       :     0.6645
-Gap Difference :     0.0014
-
+[ MODEL: RF ]
+Parameters     : n_estimators=11, random_state=42
 ----------------------------------------------------
+R^2 Train      :     0.6651
+R^2 Test       :     0.6628
+Adj. R^2 Test  :     0.6625
+Gap Difference :     0.0023
+MAE (Test)     :     0.1767
+RMSE (Test)    :     0.2397
+====================================================
 
-MAE (Test)     :     0.1764
-RMSE (Test)    :     0.2391
-
-[ MODEL CONFIGURATION ]
-Algorithm      : Random Forest Regressor
-n_estimators   : 500
-max_depth      : None
-random_state   : 42
+[ MODEL: XGB ]
+Parameters     : n_estimators=500, learning_rate=0.05, max_depth=6
+----------------------------------------------------
+R^2 Train      :     0.6645
+R^2 Test       :     0.6688
+Adj. R^2 Test  :     0.6685
+Gap Difference :     0.0043
+MAE (Test)     :     0.1755
+RMSE (Test)    :     0.2376
+====================================================
