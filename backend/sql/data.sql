@@ -9,57 +9,53 @@ INSERT INTO users VALUES
 -- DEVICES
 -- =============================================
 INSERT INTO devices VALUES
-('DEV-001','Pump 1','pump','USR-002','Field A','online','gpio_relay',0,'auto','v1.0',NOW(),NOW()),
-('DEV-002','Fan 1','fan','USR-002','Field A','online','gpio_relay',0,'auto','v1.0',NOW(),NOW()),
-('DEV-003','Sensor 1','sensor','USR-002','Field A','online','i2c',0,'auto','v1.0',NOW(),NOW()),
-('DEV-004','Light 1','light','USR-002','Greenhouse A','online','gpio_relay',1,'auto','v1.0',NOW(),NOW()),
-('DEV-005','Pump 2','pump','USR-002','Field B','online','gpio_relay',1,'auto','v1.0',NOW(),NOW()),
-('DEV-006','Fan 2','fan','USR-002','Greenhouse B','online','gpio_relay',0,'manual','v1.0',NOW(),NOW()),
-('DEV-007','Sensor 2','sensor','USR-002','Field B','online','i2c',1,'auto','v1.0',NOW(),NOW()),
-('DEV-008','Light 2','light','USR-002','Greenhouse B','offline','gpio_relay',0,'manual','v1.0',NOW(),NOW());
+('PUMP-001','may bom 1','pump','USR-002','Vườn mẫu','online','gpio_relay',0,'auto','v1.0',NOW(),NOW()),
+('LAMP-001','den chieu sang khu a','light','USR-002','Vườn mẫu','online','gpio_relay',0,'auto','v1.0',NOW(),NOW()),
+('SENSOR-001','sensor nhiet do am','sensor','USR-002','Vườn mẫu','online','i2c',0,'auto','v1.0',NOW(),NOW()),
+('SENSOR-002','sensor anh sang dat','sensor','USR-002','Vườn mẫu','online','i2c',0,'auto','v1.0',NOW(),NOW());
 
 -- =============================================
 -- CROPS
 -- =============================================
 INSERT INTO crops VALUES
-(1,'USR-002','DEV-003','Tomato','Cherry','2026-05-01','2026-07-01',50,'growing',NOW()),
-(2,'USR-002','DEV-007','Lettuce','Romaine','2026-04-20','2026-06-10',35,'growing',NOW()),
-(3,'USR-002','DEV-003','Cucumber','Japanese','2026-04-15','2026-06-25',40,'growing',NOW());
+(1,'USR-002','SENSOR-001','Tomato','Cherry','2026-05-01','2026-07-01',50,'growing',NOW()),
+(2,'USR-002','SENSOR-002','Lettuce','Romaine','2026-04-20','2026-06-10',35,'growing',NOW()),
+(3,'USR-002','SENSOR-001','Cucumber','Japanese','2026-04-15','2026-06-25',40,'growing',NOW());
 
 -- =============================================
 -- SENSOR READINGS
 -- =============================================
 INSERT INTO sensor_readings VALUES
-('READ-001','DEV-003',1,NOW(),32.5,60,30,500,400,'Field A'),
-('READ-002','DEV-003',1,NOW(),28.0,70,45,300,380,'Field A'),
-('READ-003','DEV-003',1,NOW(),29.5,65,40,650,390,'Field A'),
-('READ-004','DEV-003',1,NOW(),31.2,70,35,720,410,'Field A'),
-('READ-005','DEV-007',2,NOW(),26.4,75,55,500,350,'Field B'),
-('READ-006','DEV-007',2,NOW(),27.1,72,52,480,340,'Field B'),
-('READ-007','DEV-003',3,NOW(),33.5,60,28,800,450,'Greenhouse B'),
-('READ-008','DEV-007',3,NOW(),24.8,80,60,300,320,'Greenhouse B');
+('READ-001','SENSOR-001',1,NOW(),32.5,60,30,500,400,'Vườn mẫu'),
+('READ-002','SENSOR-001',1,NOW(),28.0,70,45,300,380,'Vườn mẫu'),
+('READ-003','SENSOR-001',1,NOW(),29.5,65,40,650,390,'Vườn mẫu'),
+('READ-004','SENSOR-001',1,NOW(),31.2,70,35,720,410,'Vườn mẫu'),
+('READ-005','SENSOR-002',2,NOW(),26.4,75,55,500,350,'Vườn mẫu'),
+('READ-006','SENSOR-002',2,NOW(),27.1,72,52,480,340,'Vườn mẫu'),
+('READ-007','SENSOR-001',3,NOW(),33.5,60,28,800,450,'Vườn mẫu'),
+('READ-008','SENSOR-002',3,NOW(),24.8,80,60,300,320,'Vườn mẫu');
 
 -- =============================================
 -- THRESHOLD CONFIG
 -- =============================================
 INSERT INTO threshold_config VALUES
-('CFG-001','DEV-003','USR-002',1,NOW());
+('CFG-001','SENSOR-001','USR-002',1,NOW());
 
 -- =============================================
 -- THRESHOLD RULES
 -- =============================================
 INSERT INTO threshold_rules VALUES
-(NULL,'CFG-001','temperature','gt',30,'DEV-002','turn_on'),
-(NULL,'CFG-001','soil_moisture','lt',35,'DEV-001','turn_on');
+(NULL,'CFG-001','temperature','gt',30,'PUMP-001','turn_on'),
+(NULL,'CFG-001','soil_moisture','lt',35,'PUMP-001','turn_on');
 
 -- =============================================
 -- ALERTS
 -- =============================================
 INSERT INTO alerts VALUES
-('ALT-001','DEV-003',1,'READ-001','high_temp','high','Temperature too high',0,NOW()),
-('ALT-002','DEV-007',2,'READ-005','high_humidity','medium','Humidity exceeded threshold',0,NOW()),
-('ALT-003','DEV-003',3,'READ-007','high_temp','critical','Temperature reached dangerous level',0,NOW()),
-('ALT-004','DEV-005',2,NULL,'pump_warning','low','Pump maintenance required',1,NOW());
+('ALT-001','SENSOR-001',1,'READ-001','high_temp','high','Temperature too high',0,NOW()),
+('ALT-002','SENSOR-002',2,'READ-005','high_humidity','medium','Humidity exceeded threshold',0,NOW()),
+('ALT-003','SENSOR-001',3,'READ-007','high_temp','critical','Temperature reached dangerous level',0,NOW()),
+('ALT-004','PUMP-001',2,NULL,'pump_warning','low','Pump maintenance required',1,NOW());
 
 -- =============================================
 -- AI RECOMMENDATIONS
