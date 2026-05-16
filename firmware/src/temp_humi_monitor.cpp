@@ -66,7 +66,7 @@ void temp_humi_monitor(void *pvParameters)
         }
 
         JsonDocument sensorDoc;
-        sensorDoc["device_id"] = "DEV-001";
+        sensorDoc["device_id"] = "SENSOR-001";
         sensorDoc["location"] = "Vườn mẫu";
         sensorDoc["crop_id"] = 1;
         sensorDoc["temperature"] = temperature;
