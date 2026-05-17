@@ -63,7 +63,8 @@ def get_prediction_and_advice(req: PredictRequest):
             humid=humid,
             soil_moist=soil_moist,
             predicted_yield=prediction_result['predicted_yield_raw'],
-            base_yield=prediction_result['diagnostics']['base_yield_used']
+            base_yield=prediction_result['diagnostics']['base_yield_used'],
+            crop_name=req.crop_name
         )
 
         prediction_result['expert_advice'] = advice_list
