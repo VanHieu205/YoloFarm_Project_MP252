@@ -35,9 +35,11 @@ app.include_router(sensor_router, prefix = "/api/sensors", tags = ["Sensors"])
 app.include_router(weather_router, prefix="/api/weather", tags=["Weather"])
 
 app.include_router(autorouter, prefix="/api/automation", tags=["Automation"])
+
+app.include_router(ai_router, prefix = "/api/ai_routes", tags = ["AI"])
 # Đăng ký Route của Farm
 app.include_router(farm_router, prefix="/api/farm", tags=["Farm"])  
-app.include_router(ai_router, prefix="/api/ai", tags=["AI Prediction"])
+
 @app.get("/")
 def root():
     return {
