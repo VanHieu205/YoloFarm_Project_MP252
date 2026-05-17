@@ -1,115 +1,100 @@
-from fastapi import APIRouter, Body, HTTPException
-import joblib
-import os
-import numpy as np
-import pandas as pd
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+import uuid
+import json
+from datetime import datetime
+
+from ML.ai_engine import YieldPredictor
+from core.database import get_connection, close_connection
 
 router = APIRouter()
 
-# ===============================
-# BASE PATH
-# ===============================
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-MODEL_PATH = os.path.join(BASE_DIR, "ML", "models", "xgb_crop_yield_model.pkl")
-FEATURES_PATH = os.path.join(BASE_DIR, "ML", "models", "model_features.pkl")
-
-# ===============================
-# LOAD MODEL SAFE
-# ===============================
-model = None
-features = None
-
-if os.path.exists(MODEL_PATH):
-    model = joblib.load(MODEL_PATH)
-
-if os.path.exists(FEATURES_PATH):
-    features = joblib.load(FEATURES_PATH)
+ai_predictor = YieldPredictor(models_dir="../ML/models")
 
 
-if model is None or features is None:
-    print("⚠️ WARNING: AI model hoặc features chưa load được")
+class PredictRequest(BaseModel):
+    user_id: str
+    crop_name: str
+    manual_season: str = None
 
 
-# ===============================
-# PREPROCESS
-# ===============================
-def preprocess_input(data: dict):
-
-    df = pd.DataFrame([data])
-
-    if "Crop" in df.columns:
-        df["Crop"] = df["Crop"].str.strip().str.lower()
-
-    if "Season" in df.columns:
-        df["Season"] = df["Season"].str.strip().str.lower()
-
-    if all(col in df.columns for col in ["Temperature", "Humidity", "Soil_Moisture"]):
-
-        df["Temp_Humid_Index"] = df["Temperature"] * df["Humidity"]
-        df["Soil_Temp_Ratio"] = df["Soil_Moisture"] / (df["Temperature"] + 1)
-        df["Temp_Stress"] = (df["Temperature"] - 25) ** 2
-        df["Humid_Stress"] = (df["Humidity"] - 60) ** 2
-
-    df = pd.get_dummies(df)
-
-    df = df.reindex(columns=features, fill_value=0)
-
-    return df
-
-
-# ===============================
-# PREDICT API
-# ===============================
 @router.post("/predict")
-def predict(data: dict = Body(...)):
+def get_prediction_and_advice(req: PredictRequest):
+    connect = get_connection()
+    cursor = connect.cursor(dictionary=True)
 
     try:
-        if model is None:
-            raise HTTPException(status_code=500, detail="Model chưa được load")
+        query = """
+            SELECT sr.temperature, sr.humidity, sr.soil_moisture, sr.timestamp
+            FROM sensor_readings sr
+            JOIN devices d ON sr.device_id = d.device_id
+            WHERE d.user_id = %s
+              AND sr.temperature IS NOT NULL 
+              AND sr.humidity IS NOT NULL 
+              AND sr.soil_moisture IS NOT NULL
+            ORDER BY sr.timestamp DESC 
+            LIMIT 1
+        """
+        cursor.execute(query, (req.user_id,))
+        latest_sensor = cursor.fetchone()
 
-        X = preprocess_input(data)
+        if not latest_sensor:
+            raise HTTPException(
+                status_code=404,
+                detail="Không tìm thấy dữ liệu cảm biến cho người dùng này."
+            )
 
-        pred_yield = float(model.predict(X)[0])
+        temp = latest_sensor['temperature']
+        humid = latest_sensor['humidity']
+        soil_moist = latest_sensor['soil_moisture']
+        sensor_time = latest_sensor['timestamp']
 
-        temp = data.get("Temperature", 0)
-        humidity = data.get("Humidity", 0)
-        soil = data.get("Soil_Moisture", 0)
-
-        # =========================
-        # SIMPLE AI LOGIC LAYER
-        # =========================
-        health = 100
-
-        if soil < 30:
-            health -= 20
-        if temp > 32:
-            health -= 15
-        if humidity < 40:
-            health -= 10
-
-        health = max(0, min(100, health))
-
-        risk = (
-            "Low" if health >= 80 else
-            "Medium" if health >= 50 else
-            "High"
+        prediction_result = ai_predictor.predict_realtime(
+            temp=temp,
+            humid=humid,
+            soil_moist=soil_moist,
+            crop_name=req.crop_name,
+            manual_season=req.manual_season,
+            use_vn_base=True
         )
 
-        confidence = 0.88
+        advice_list = ai_predictor.generate_advice(
+            temp=temp,
+            humid=humid,
+            soil_moist=soil_moist,
+            predicted_yield=prediction_result['predicted_yield_raw'],
+            base_yield=prediction_result['diagnostics']['base_yield_used']
+        )
 
-        yield_growth = min(50, max(0, pred_yield / 10))
+        prediction_result['expert_advice'] = advice_list
+
+        prediction_id = str(uuid.uuid4())
+
+        insert_query = """
+        INSERT INTO ai_prediction_history (
+            id, user_id, crop_name, temperature, humidity, soil_moisture, 
+            predicted_min, predicted_max, advices
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+
+        if isinstance(sensor_time, datetime):
+            sensor_time = sensor_time.strftime("%Y-%m-%d %H:%M:%S")
 
         return {
             "success": True,
-            "prediction": {
-                "yield": round(pred_yield, 2),
-                "yield_growth_percent": round(yield_growth, 2),
-                "health_score": round(health, 2),
-                "risk_level": risk,
-                "confidence": confidence
-            }
+            "sensor_data_used": {
+                "temperature": temp,
+                "humidity": humid,
+                "soil_moisture": soil_moist,
+                "timestamp": sensor_time
+            },
+            "ai_analysis": prediction_result
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        close_connection(connect, cursor)
