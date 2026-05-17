@@ -2,30 +2,12 @@ import { useEffect, useState, useCallback } from "react"
 import axios from "axios"
 import {
   Brain, Leaf, AlertTriangle, TrendingUp, TrendingDown,
-  Thermometer, Droplets, Wind, Sun, RefreshCw,
-  Clock, Bot, Play, Sparkles, Activity,
+  Thermometer, Droplets, Wind, RefreshCw,
+  Clock, Bot, Play, Sparkles, Activity, ChevronDown,
 } from "lucide-react"
 
 const API = "http://localhost:8000"
-const TARGET_YIELD_KG = 6200  // kg/ha (= 6.2 tấn/ha)
-
-// ─── Tính health score từ sensor thật ────────────────────────────────────
-function calcHealthScore(temp, humid, soilMoist) {
-  let score = 100
-  if (temp != null) {
-    if (temp > 35 || temp < 15) score -= 25
-    else if (temp > 32 || temp < 20) score -= 10
-  }
-  if (humid != null) {
-    if (humid < 40 || humid > 95) score -= 20
-    else if (humid < 55 || humid > 85) score -= 8
-  }
-  if (soilMoist != null) {
-    if (soilMoist < 30 || soilMoist > 80) score -= 25
-    else if (soilMoist < 45 || soilMoist > 70) score -= 10
-  }
-  return Math.max(0, score)
-}
+const TARGET_YIELD_KG = 6200
 
 // ─── Tính risk từ health + yield ─────────────────────────────────────────
 function calcRisk(healthScore, yieldKg) {
@@ -39,7 +21,6 @@ function calcRisk(healthScore, yieldKg) {
 const healthColor = s => s >= 80 ? "#4ade80" : s >= 50 ? "#fbbf24" : "#f87171"
 const riskColor   = r => ({ low:"#4ade80", medium:"#fbbf24", high:"#f87171" })[r] ?? "#a78bfa"
 const riskLabel   = r => ({ low:"Thấp", medium:"Trung bình", high:"Cao" })[r] ?? "—"
-const toTan       = kg => kg != null ? (kg / 1000).toFixed(2) : null
 
 // ─── Sinh gợi ý từ expert_advice + sensor thật ────────────────────────────
 function buildRecs(sensor, expertAdvice = []) {
@@ -56,8 +37,8 @@ function buildRecs(sensor, expertAdvice = []) {
       why: `Độ ẩm đất ${SM}% thấp hơn ngưỡng an toàn 40%. AI cảnh báo nguy cơ mất năng suất cao nếu không tưới ngay.`,
       impact: 900,
       actions: [
-        { label:"Bật bơm ngay",   icon:Play,  prompt:"Bật máy bơm ngay bây giờ" },
-        { label:"Tạo automation", icon:Bot,   prompt:"Cài automation tự động bật máy bơm khi độ ẩm đất xuống dưới 40%" },
+        { label:"Bật bơm ngay",   icon:Play, prompt:"Bật máy bơm ngay bây giờ" },
+        { label:"Tạo automation", icon:Bot,  prompt:"Cài automation tự động bật máy bơm khi độ ẩm đất xuống dưới 40%" },
       ],
     })
   else if (SM != null && SM < 50)
@@ -65,7 +46,7 @@ function buildRecs(sensor, expertAdvice = []) {
       color:"#60a5fa", bg:"rgba(59,130,246,.07)", border:"rgba(59,130,246,.2)", iconBg:"rgba(59,130,246,.18)",
       icon: Droplets, priority:"ƯU TIÊN CAO",
       title: "Điều chỉnh lịch máy bơm tưới",
-      why: `Độ ẩm đất ${SM}% — thấp hơn ngưỡng 50–60% tối ưu cho lúa. Tăng tần suất tưới buổi sáng sớm.`,
+      why: `Độ ẩm đất ${SM}% — thấp hơn ngưỡng 50–60% tối ưu. Tăng tần suất tưới buổi sáng sớm.`,
       impact: 500,
       actions: [
         { label:"Đổi lịch tưới",  icon:Clock, prompt:"Thay đổi lịch tưới máy bơm để tăng độ ẩm đất lên 50–60%" },
@@ -82,8 +63,8 @@ function buildRecs(sensor, expertAdvice = []) {
       why: `Độ ẩm đất ${SM}% vượt ngưỡng 80%, nguy cơ thối rễ cao. Cần tắt máy bơm và kiểm tra hệ thống thoát nước.`,
       impact: 800,
       actions: [
-        { label:"Tắt máy bơm", icon:Play, prompt:"Tắt máy bơm ngay bây giờ" },
-        { label:"Automation ngập", icon:Bot, prompt:"Tạo automation tắt máy bơm khi độ ẩm đất vượt quá 80%" },
+        { label:"Tắt máy bơm",    icon:Play, prompt:"Tắt máy bơm ngay bây giờ" },
+        { label:"Automation ngập",icon:Bot,  prompt:"Tạo automation tắt máy bơm khi độ ẩm đất vượt quá 80%" },
       ],
     })
 
@@ -95,8 +76,8 @@ function buildRecs(sensor, expertAdvice = []) {
       why: `Nhiệt độ ${T}°C vượt ngưỡng 35°C gây stress nhiệt nghiêm trọng. Cần bật quạt và phun sương làm mát ngay.`,
       impact: 700,
       actions: [
-        { label:"Bật quạt ngay",     icon:Play,  prompt:"Bật quạt thông gió ngay bây giờ" },
-        { label:"Automation nhiệt",  icon:Bot,   prompt:"Tạo automation bật quạt và phun sương khi nhiệt độ vượt quá 35°C" },
+        { label:"Bật quạt ngay",    icon:Play, prompt:"Bật quạt thông gió ngay bây giờ" },
+        { label:"Automation nhiệt", icon:Bot,  prompt:"Tạo automation bật quạt và phun sương khi nhiệt độ vượt quá 35°C" },
       ],
     })
   else if (T != null && T > 28)
@@ -120,8 +101,8 @@ function buildRecs(sensor, expertAdvice = []) {
       why: `Độ ẩm ${H}% — quá thấp, cây bốc hơi nước mạnh, giảm quang hợp. Bật phun sương ngay.`,
       impact: 400,
       actions: [
-        { label:"Bật phun sương",     icon:Play,  prompt:"Bật hệ thống phun sương ngay bây giờ" },
-        { label:"Automation độ ẩm",   icon:Bot,   prompt:"Tạo automation bật phun sương khi độ ẩm không khí xuống dưới 40%" },
+        { label:"Bật phun sương",   icon:Play, prompt:"Bật hệ thống phun sương ngay bây giờ" },
+        { label:"Automation độ ẩm", icon:Bot,  prompt:"Tạo automation bật phun sương khi độ ẩm không khí xuống dưới 40%" },
       ],
     })
   else if (H != null && H < 60)
@@ -132,8 +113,8 @@ function buildRecs(sensor, expertAdvice = []) {
       why: `Độ ẩm không khí ${H}% thấp hơn mức lý tưởng 65–80%. Phun sương buổi sáng giúp giảm thoát hơi nước.`,
       impact: 200,
       actions: [
-        { label:"Lên lịch phun sương", icon:Clock, prompt:"Lên lịch bật hệ thống phun sương buổi sáng 7h–9h để tăng độ ẩm không khí" },
-        { label:"Automation độ ẩm KK", icon:Bot,   prompt:"Tạo automation bật phun sương khi độ ẩm không khí xuống dưới 60%" },
+        { label:"Lên lịch phun sương",  icon:Clock, prompt:"Lên lịch bật hệ thống phun sương buổi sáng 7h–9h để tăng độ ẩm không khí" },
+        { label:"Automation độ ẩm KK",  icon:Bot,   prompt:"Tạo automation bật phun sương khi độ ẩm không khí xuống dưới 60%" },
       ],
     })
 
@@ -199,6 +180,80 @@ const AdviceCard = ({ text }) => {
   )
 }
 
+// ─── Health Breakdown ──────────────────────────────────────────────────────
+const statusMeta = {
+  good:          { color:"#4ade80", label:"Tốt" },
+  warning:       { color:"#fbbf24", label:"Cảnh báo" },
+  critical_high: { color:"#f87171", label:"Quá cao" },
+  critical_low:  { color:"#f87171", label:"Quá thấp" },
+}
+const sensorLabel = { temperature:"Nhiệt độ", humidity:"Độ ẩm KK", soil_moisture:"Độ ẩm đất" }
+
+const HealthBreakdown = ({ breakdown, thresholds, cropName }) => {
+  if (!breakdown || breakdown.length === 0) return null
+  return (
+    <div style={{ marginTop:10, borderRadius:10, border:"1px solid rgba(255,255,255,.07)",
+      background:"rgba(255,255,255,.03)", padding:"12px 14px" }}>
+      <div style={{ fontSize:11, fontWeight:500, letterSpacing:".06em",
+        color:"rgba(255,255,255,.3)", marginBottom:10 }}>
+        NGƯỠNG CỦA {(cropName ?? "").toUpperCase()}
+      </div>
+      {breakdown.map((b, i) => {
+        const meta = statusMeta[b.status] ?? { color:"#a78bfa", label:b.status }
+        const isOk = b.status === "good"
+        return (
+          <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:10,
+            marginBottom: i < breakdown.length - 1 ? 8 : 0 }}>
+            {/* Dot */}
+            <div style={{ width:7, height:7, borderRadius:99, background:meta.color,
+              flexShrink:0, marginTop:5 }} />
+            <div style={{ flex:1 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <span style={{ fontSize:12, color:"rgba(255,255,255,.55)" }}>
+                  {sensorLabel[b.sensor] ?? b.sensor}
+                </span>
+                <span style={{ fontSize:11, color:meta.color, fontWeight:500 }}>
+                  {isOk ? "✓" : `−${b.deducted} điểm`}
+                </span>
+              </div>
+              <div style={{ fontSize:11, color: isOk ? "rgba(255,255,255,.3)" : "rgba(255,255,255,.5)",
+                marginTop:2, lineHeight:1.5 }}>
+                {b.message}
+              </div>
+              {/* Mini threshold bar */}
+              {thresholds && thresholds[b.sensor] && (
+                <div style={{ marginTop:5, position:"relative", height:4,
+                  borderRadius:99, background:"rgba(255,255,255,.08)", overflow:"visible" }}>
+                  {/* Safe zone */}
+                  {(() => {
+                    const th = thresholds[b.sensor]
+                    const range = b.sensor === "temperature" ? [0, 50]
+                                : b.sensor === "humidity"    ? [0, 100]
+                                : [0, 100]
+                    const total = range[1] - range[0]
+                    const safeLeft  = ((th.min - range[0]) / total) * 100
+                    const safeWidth = ((th.max - th.min) / total) * 100
+                    const valPct    = Math.min(100, Math.max(0, ((b.value - range[0]) / total) * 100))
+                    return (
+                      <>
+                        <div style={{ position:"absolute", left:`${safeLeft}%`, width:`${safeWidth}%`,
+                          height:"100%", background:"rgba(74,222,128,.25)", borderRadius:99 }} />
+                        <div style={{ position:"absolute", left:`${valPct}%`, top:-2,
+                          width:8, height:8, borderRadius:99, background:meta.color,
+                          transform:"translateX(-50%)", border:"1px solid rgba(0,0,0,.4)" }} />
+                      </>
+                    )
+                  })()}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 const RecCard = ({ rec, idx, onAction }) => {
   const Icon = rec.icon
   return (
@@ -217,10 +272,8 @@ const RecCard = ({ rec, idx, onAction }) => {
           <div style={{ fontSize:14, fontWeight:500, color:rec.color }}>{rec.title}</div>
         </div>
       </div>
-
       <p style={{ fontSize:12, color:"rgba(255,255,255,.45)", lineHeight:1.6,
         margin:"0 0 12px 50px" }}>{rec.why}</p>
-
       <div style={{ display:"flex", flexWrap:"wrap", gap:8, paddingLeft:50 }}>
         {rec.actions.map((a, i) => {
           const AIcon = a.icon
@@ -236,7 +289,6 @@ const RecCard = ({ rec, idx, onAction }) => {
           )
         })}
       </div>
-
       <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:12, marginLeft:50,
         padding:"10px 14px", borderRadius:8, background:`${rec.color}0a`,
         borderLeft:`3px solid ${rec.color}` }}>
@@ -250,28 +302,93 @@ const RecCard = ({ rec, idx, onAction }) => {
   )
 }
 
+// ─── Crop Selector ────────────────────────────────────────────────────────
+// ─── Crop Selector ────────────────────────────────────────────────────────
+const CropSelector = ({ crops, selected, onChange, loading }) => (
+  <div style={{ position:"relative", display:"inline-flex", alignItems:"center" }}>
+    <select
+      value={selected} // Đang nhận vào crop_id dưới dạng string
+      onChange={e => {
+        // Tìm lại object crop hoàn chỉnh dựa trên crop_id được chọn
+        const selectedId = e.target.value;
+        const selectedCropObj = crops.find(c => String(c.crop_id) === selectedId);
+        onChange(selectedCropObj); 
+      }}
+      disabled={loading || crops.length === 0}
+      style={{
+        appearance:"none", WebkitAppearance:"none",
+        fontSize:12, fontWeight:500,
+        padding:"6px 32px 6px 12px",
+        borderRadius:8,
+        background:"rgba(255,255,255,.06)",
+        border:"1px solid rgba(255,255,255,.15)",
+        color: loading ? "rgba(255,255,255,.3)" : "rgba(255,255,255,.85)",
+        cursor: loading ? "not-allowed" : "pointer",
+        outline:"none", minWidth:140,
+      }}
+    >
+      {loading && <option value="">Đang tải...</option>}
+      {!loading && crops.length === 0 && <option value="">Không có cây trồng</option>}
+      {crops.map(c => (
+        // SỬA Ở ĐÂY: value phải là crop_id để đồng nhất với prop 'selected'
+        <option key={c.crop_id} value={String(c.crop_id)} 
+          style={{ background:"#1a1f35", color:"#f1f5f9" }}>
+          {c.crop_name}{c.variety ? ` — ${c.variety}` : ""}
+        </option>
+      ))}
+    </select>
+    <ChevronDown size={13} color="rgba(255,255,255,.4)"
+      style={{ position:"absolute", right:10, pointerEvents:"none" }} />
+  </div>
+)
+
 // ─── Main ─────────────────────────────────────────────────────────────────
-const AIAnalysis = ({ navigate, userId = "USR-002", cropName = "rice" }) => {
-  const [sensor,      setSensor]      = useState(null)   // từ sensor_data_used
-  const [aiAnalysis,  setAiAnalysis]  = useState(null)   // từ ai_analysis
-  const [loading,     setLoading]     = useState(true)
+const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
+  const [cropList,     setCropList]     = useState([])
+  const [cropsLoading, setCropsLoading] = useState(true)
+  const [selectedCrop, setSelectedCrop] = useState(null)
+
+  const [sensor,      setSensor]      = useState(null)
+  const [aiAnalysis,  setAiAnalysis]  = useState(null)
+  const [loading,     setLoading]     = useState(false)
   const [refreshing,  setRefreshing]  = useState(false)
   const [error,       setError]       = useState(null)
   const [lastUpdated, setLastUpdated] = useState(null)
 
+  // ── Fetch danh sách cây từ DB khi mount / re-mount ──
+  useEffect(() => {
+    setCropsLoading(true)
+    setSensor(null)
+    setAiAnalysis(null)
+    setSelectedCrop(null)
+    axios.get(`${API}/api/farm/crops`, { params: { user_id: userId } })
+      .then(res => {
+        const list = Array.isArray(res.data) ? res.data : (res.data?.crops ?? [])
+        const growing = list.filter(c => c.status === "growing" || !c.status)
+        setCropList(growing)
+        if (growing.length > 0) setSelectedCrop(growing[0])
+      })
+      .catch(() => {
+        setCropList([])
+      })
+      .finally(() => setCropsLoading(false))
+  }, [userId])
+
+  // ── Fetch AI analysis khi selectedCrop thay đổi hoặc re-mount ──
+  const selectedCropId   = selectedCrop?.crop_id   ?? null
+  const selectedCropName = selectedCrop?.crop_name?.toLowerCase() ?? null
+
   const fetchData = useCallback(async (isRefresh = false) => {
+    if (!selectedCropName) return
     isRefresh ? setRefreshing(true) : setLoading(true)
     setError(null)
     try {
       const { data } = await axios.post(`${API}/api/ai_routes/predict`, {
         user_id:       userId,
-        crop_name:     cropName,
+        crop_name:     selectedCropName,
         manual_season: null,
       })
-
       if (!data.success) throw new Error("API trả về success=false")
-
-      // Lấy sensor từ sensor_data_used (backend đã query DB)
       setSensor(data.sensor_data_used ?? null)
       setAiAnalysis(data.ai_analysis ?? null)
       setLastUpdated(new Date())
@@ -282,57 +399,62 @@ const AIAnalysis = ({ navigate, userId = "USR-002", cropName = "rice" }) => {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [userId, cropName])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, selectedCropId])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  // Chạy mỗi khi crop thay đổi hoặc component re-mount (navigate đi rồi quay lại)
+  useEffect(() => {
+    setSensor(null)
+    setAiAnalysis(null)
+    if (selectedCropId) fetchData()
+  }, [selectedCropId, fetchData])
 
   const handleAction = (prompt) => {
     if (navigate) navigate("/automation/create", { state: { prompt } })
   }
 
-  if (loading) return (
-    <div style={{ background:"#0a0f1e", minHeight:"100vh", display:"flex",
-      flexDirection:"column", alignItems:"center", justifyContent:"center", gap:16 }}>
-      <Brain size={40} color="#a78bfa" />
-      <p style={{ margin:0, fontSize:14, color:"rgba(255,255,255,.4)" }}>AI đang phân tích dữ liệu…</p>
-    </div>
-  )
-
-  // ── Tính các chỉ số từ dữ liệu thật ──
+  // ── Tính các chỉ số ──
   const T  = sensor?.temperature
   const H  = sensor?.humidity
   const SM = sensor?.soil_moisture
 
-  const yieldKg  = aiAnalysis?.predicted_yield_raw ?? null          // kg/ha thật
-  const yieldTan = yieldKg != null ? (yieldKg / 1000).toFixed(2) : null
+  const yieldKg   = aiAnalysis?.predicted_yield_raw ?? null
+  const yieldTan  = yieldKg != null ? (yieldKg / 1000).toFixed(2) : null
   const targetTan = (TARGET_YIELD_KG / 1000).toFixed(1)
 
-  const safeMin  = aiAnalysis?.safe_range?.min
-  const safeMax  = aiAnalysis?.safe_range?.max
+  const safeMin = aiAnalysis?.safe_range?.min
+  const safeMax = aiAnalysis?.safe_range?.max
 
-  const health   = T != null || H != null || SM != null
-                    ? calcHealthScore(T, H, SM) : null
-  const risk     = health != null && yieldKg != null
-                    ? calcRisk(health, yieldKg) : null
+  const diag   = aiAnalysis?.diagnostics ?? {}
+  const advice = aiAnalysis?.expert_advice ?? []
 
-  const diag     = aiAnalysis?.diagnostics ?? {}
-  const advice   = aiAnalysis?.expert_advice ?? []
+  // ── Sức khỏe — lấy từ AI engine (đã tính theo ngưỡng từng loại cây) ──
+  const healthData      = aiAnalysis?.health ?? null
+  const health          = healthData?.score ?? null
+  const healthStatus    = healthData?.overall_status ?? null
+  const healthBreakdown = healthData?.breakdown ?? []
+  const thresholdsUsed  = healthData?.thresholds_used ?? null
 
-  const recs     = buildRecs(sensor, advice)
-  const gap      = yieldKg != null ? Math.max(0, TARGET_YIELD_KG - yieldKg) : null
+  const risk = health != null && yieldKg != null ? calcRisk(health, yieldKg) : null
+
+  const recs        = buildRecs(sensor, advice)
+  const gap         = yieldKg != null ? Math.max(0, TARGET_YIELD_KG - yieldKg) : null
   const totalImpact = recs.reduce((s, r) => s + r.impact, 0)
-  const projectedKg = yieldKg != null
-    ? Math.min(TARGET_YIELD_KG, yieldKg + totalImpact) : null
+  const projectedKg = yieldKg != null ? Math.min(TARGET_YIELD_KG, yieldKg + totalImpact) : null
+  const isImputed   = diag.data_quality === "imputed_warning"
 
-  const dataQuality = diag.data_quality
-  const isImputed   = dataQuality === "imputed_warning"
+  // Tên cây hiển thị đẹp — lấy trực tiếp từ object selectedCrop
+  const cropDisplayName = selectedCrop
+    ? `${selectedCrop.crop_name}${selectedCrop.variety ? ` (${selectedCrop.variety})` : ""}`
+    : "—"
 
   return (
     <div style={{ background:"#0a0f1e", padding:"1rem", minHeight:"100vh",
       fontFamily:"system-ui,sans-serif", color:"#f1f5f9" }}>
 
       {/* Header */}
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"1.25rem" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+        marginBottom:"1.25rem", flexWrap:"wrap", gap:10 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <div style={{ width:36, height:36, borderRadius:10, background:"rgba(139,92,246,.25)",
             border:"1px solid rgba(139,92,246,.4)", display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -347,7 +469,16 @@ const AIAnalysis = ({ navigate, userId = "USR-002", cropName = "rice" }) => {
             </p>
           </div>
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+
+        <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+          {/* Crop selector */}
+          <CropSelector
+            crops={cropList}
+            selected={selectedCrop ? String(selectedCrop.crop_id) : ""}
+            onChange={crop => { setSelectedCrop(crop); setSensor(null); setAiAnalysis(null) }}
+            loading={cropsLoading}
+          />
+
           {diag.season_detected && (
             <span style={{ fontSize:11, padding:"3px 10px", borderRadius:99,
               background:"rgba(167,139,250,.12)", color:"#a78bfa",
@@ -360,7 +491,7 @@ const AIAnalysis = ({ navigate, userId = "USR-002", cropName = "rice" }) => {
             border:"1px solid rgba(34,197,94,.2)" }}>
             <span style={{ width:6, height:6, borderRadius:99, background:"#4ade80" }} /> Live
           </span>
-          <button onClick={() => fetchData(true)} disabled={refreshing}
+          <button onClick={() => fetchData(true)} disabled={refreshing || !selectedCrop}
             style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:12, padding:"6px 12px",
               borderRadius:8, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)",
               color:"rgba(255,255,255,.6)", cursor:"pointer", opacity: refreshing ? .5 : 1 }}>
@@ -370,161 +501,225 @@ const AIAnalysis = ({ navigate, userId = "USR-002", cropName = "rice" }) => {
         </div>
       </div>
 
-      {/* Data quality warning */}
-      {isImputed && (
-        <div style={{ background:"rgba(251,191,36,.1)", border:"1px solid rgba(251,191,36,.25)",
-          borderRadius:10, padding:"10px 14px", marginBottom:14, fontSize:12,
-          color:"#fde68a", display:"flex", gap:8, alignItems:"center" }}>
-          <AlertTriangle size={14} />
-          Một số cảm biến không có dữ liệu — AI đã dùng giá trị mặc định. Kết quả có thể sai lệch.
+      {/* Loading crops */}
+      {cropsLoading && (
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
+          justifyContent:"center", gap:16, padding:"4rem 0" }}>
+          <Brain size={40} color="#a78bfa" style={{ animation:"spin 2s linear infinite" }} />
+          <p style={{ margin:0, fontSize:14, color:"rgba(255,255,255,.4)" }}>
+            Đang tải danh sách cây trồng…
+          </p>
         </div>
       )}
 
-      {error && (
-        <div style={{ background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.25)",
-          borderRadius:10, padding:"10px 14px", marginBottom:14, fontSize:13,
-          color:"#fca5a5", display:"flex", gap:8, alignItems:"center" }}>
-          <AlertTriangle size={15} /> {error}
+      {/* Loading AI */}
+      {!cropsLoading && loading && (
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
+          justifyContent:"center", gap:16, padding:"4rem 0" }}>
+          <Brain size={40} color="#a78bfa" style={{ animation:"spin 2s linear infinite" }} />
+          <p style={{ margin:0, fontSize:14, color:"rgba(255,255,255,.4)" }}>
+            AI đang phân tích {cropDisplayName}…
+          </p>
         </div>
       )}
 
-      {/* Stat cards */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:10, marginBottom:12 }}>
-        <StatCard
-          label="SỨC KHỎE" value={health} suffix="%"
-          Icon={Leaf} color={healthColor(health ?? 0)} barPct={health}
-          sub="Tính từ cảm biến thật"
-        />
-        <StatCard
-          label="RỦI RO" value={risk ? riskLabel(risk) : "—"}
-          Icon={AlertTriangle} color={risk ? riskColor(risk) : "#a78bfa"}
-          sub="Yield + môi trường"
-        />
-        <StatCard
-          label="NĂNG SUẤT" value={yieldTan} suffix=" tấn/ha"
-          Icon={TrendingUp} color="#60a5fa"
-          barPct={yieldKg != null ? (yieldKg / TARGET_YIELD_KG) * 100 : null}
-          sub={safeMin != null ? `±${diag.uncertainty_margin ?? ""} · ${(safeMin/1000).toFixed(1)}–${(safeMax/1000).toFixed(1)} tấn` : "Dự báo XGBoost"}
-        />
-        <StatCard
-          label="TÁC ĐỘNG KHÍ HẬU" value={diag.weather_impact_ratio != null ? Math.round(diag.weather_impact_ratio * 100) : null} suffix="%"
-          Icon={Activity} color="#a78bfa"
-          barPct={diag.weather_impact_ratio != null ? diag.weather_impact_ratio * 100 : null}
-          sub={diag.base_yield_source ?? "Nguồn dữ liệu"}
-        />
-      </div>
-
-      <Divider />
-      <SL>DỮ LIỆU CẢM BIẾN — LẤY TỪ DATABASE</SL>
-
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))", gap:10, marginBottom:4 }}>
-        <SensorCard label="NHIỆT ĐỘ"   value={T}  unit="°C" Icon={Thermometer} color="#f87171" />
-        <SensorCard label="ĐỘ ẨM KK"   value={H}  unit="%"  Icon={Droplets}    color="#60a5fa" />
-        <SensorCard label="ĐỘ ẨM ĐẤT"  value={SM} unit="%"  Icon={Droplets}    color="#4ade80" />
-        <SensorCard
-          label="CẬP NHẬT LÚC"
-          value={sensor?.timestamp
-            ? new Date(sensor.timestamp).toLocaleTimeString("vi-VN", { hour:"2-digit", minute:"2-digit" })
-            : null}
-          unit="" Icon={Clock} color="#fbbf24"
-        />
-      </div>
-
-      {/* Expert advice từ AI engine */}
-      {advice.length > 0 && (
-        <>
-          <Divider />
-          <SL>NHẬN XÉT CHUYÊN GIA — AI ENGINE</SL>
-          {advice.map((a, i) => <AdviceCard key={i} text={a} />)}
-        </>
+      {/* No crop selected */}
+      {!cropsLoading && !loading && !selectedCrop && (
+        <div style={{ textAlign:"center", padding:"4rem 0", color:"rgba(255,255,255,.3)", fontSize:14 }}>
+          {cropList.length === 0
+            ? "Chưa có cây trồng nào. Hãy thêm cây trong mục Mùa vụ."
+            : "Chọn cây trồng để bắt đầu phân tích."}
+        </div>
       )}
 
-      {/* Recommendations + actions */}
-      {recs.length > 0 && (
+      {/* Main content */}
+      {!cropsLoading && !loading && selectedCrop?.crop_name && (
         <>
-          <Divider />
+          {/* Crop badge */}
+          <div style={{ marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
+            <Leaf size={14} color="#4ade80" />
+            <span style={{ fontSize:13, color:"rgba(255,255,255,.6)" }}>
+              Đang phân tích:
+            </span>
+            <span style={{ fontSize:13, fontWeight:500, color:"#4ade80" }}>
+              {cropDisplayName}
+            </span>
+          </div>
 
-          {/* Banner gap */}
-          {gap != null && gap > 0 && (
-            <div style={{ borderRadius:14, padding:"18px 20px", border:"1px solid rgba(239,68,68,.25)",
-              background:"rgba(239,68,68,.07)", display:"flex", alignItems:"center",
-              justifyContent:"space-between", gap:16, flexWrap:"wrap", marginBottom:14 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                <div style={{ width:44, height:44, borderRadius:11, background:"rgba(239,68,68,.18)",
-                  display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  <TrendingDown size={22} color="#f87171" />
-                </div>
-                <div>
-                  <span style={{ fontSize:10, fontWeight:500, letterSpacing:".06em", padding:"2px 8px",
-                    borderRadius:99, background:"rgba(239,68,68,.15)", color:"#f87171",
-                    border:"1px solid rgba(239,68,68,.25)", marginBottom:6, display:"inline-block" }}>
-                    AI PHÁT HIỆN
-                  </span>
-                  <div style={{ fontSize:15, fontWeight:500, color:"#fca5a5" }}>Năng suất thấp hơn kỳ vọng</div>
-                  <div style={{ fontSize:12, color:"rgba(255,255,255,.4)", marginTop:3 }}>
-                    Còn thiếu {(gap/1000).toFixed(1)} tấn/ha — {recs.length} hành động có thể cải thiện
-                  </div>
-                </div>
-              </div>
-              <div style={{ display:"flex", gap:20, flexShrink:0 }}>
-                <div style={{ textAlign:"center" }}>
-                  <div style={{ fontSize:22, fontWeight:500, color:"#f87171" }}>{yieldTan ?? "—"}</div>
-                  <div style={{ fontSize:11, color:"rgba(255,255,255,.35)", marginTop:2 }}>tấn/ha hiện tại</div>
-                </div>
-                <div style={{ width:1, background:"rgba(255,255,255,.08)" }} />
-                <div style={{ textAlign:"center" }}>
-                  <div style={{ fontSize:22, fontWeight:500, color:"#4ade80" }}>{targetTan}</div>
-                  <div style={{ fontSize:11, color:"rgba(255,255,255,.35)", marginTop:2 }}>tấn/ha mục tiêu</div>
-                </div>
-              </div>
+          {/* Data quality warning */}
+          {isImputed && (
+            <div style={{ background:"rgba(251,191,36,.1)", border:"1px solid rgba(251,191,36,.25)",
+              borderRadius:10, padding:"10px 14px", marginBottom:14, fontSize:12,
+              color:"#fde68a", display:"flex", gap:8, alignItems:"center" }}>
+              <AlertTriangle size={14} />
+              Một số cảm biến không có dữ liệu — AI đã dùng giá trị mặc định. Kết quả có thể sai lệch.
             </div>
           )}
 
-          <SL>HÀNH ĐỘNG ĐỀ XUẤT — ƯU TIÊN CAO NHẤT TRƯỚC</SL>
-          {recs.map((rec, i) => (
-            <RecCard key={i} rec={rec} idx={i} onAction={handleAction} />
-          ))}
+          {error && (
+            <div style={{ background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.25)",
+              borderRadius:10, padding:"10px 14px", marginBottom:14, fontSize:13,
+              color:"#fca5a5", display:"flex", gap:8, alignItems:"center" }}>
+              <AlertTriangle size={15} /> {error}
+            </div>
+          )}
 
-          {/* Apply all */}
-          <div style={{ borderRadius:12, padding:"14px 18px", border:"1px solid rgba(34,197,94,.2)",
-            background:"rgba(34,197,94,.06)", display:"flex", alignItems:"center",
-            gap:14, flexWrap:"wrap" }}>
-            <div style={{ width:38, height:38, borderRadius:9, background:"rgba(34,197,94,.15)",
-              display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-              <Sparkles size={19} color="#4ade80" />
-            </div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:13, fontWeight:500, color:"#86efac", marginBottom:2 }}>
-                Áp dụng tất cả → dự báo đạt {projectedKg != null ? (projectedKg/1000).toFixed(1) : "—"} tấn/ha
-              </div>
-              <div style={{ fontSize:12, color:"rgba(255,255,255,.4)" }}>
-                Tăng +{(totalImpact/1000).toFixed(1)} tấn/ha · thời gian thấy hiệu quả: 2–3 tuần
-              </div>
-            </div>
-            <button
-              onClick={() => handleAction("Áp dụng tất cả thay đổi: " + recs.map(r=>r.title).join(", "))}
-              style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:12, fontWeight:500,
-                padding:"8px 14px", borderRadius:8, cursor:"pointer", whiteSpace:"nowrap",
-                background:"rgba(34,197,94,.2)", border:"1px solid rgba(34,197,94,.35)", color:"#4ade80" }}>
-              Áp dụng tất cả →
-            </button>
+          {/* Stat cards */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:10, marginBottom:12 }}>
+            <StatCard
+              label="SỨC KHỎE" value={health} suffix="%"
+              Icon={Leaf} color={healthColor(health ?? 0)} barPct={health}
+              sub={
+                healthStatus === "excellent" ? "Điều kiện lý tưởng" :
+                healthStatus === "good"      ? "Điều kiện tốt" :
+                healthStatus === "warning"   ? "Cần chú ý" :
+                healthStatus === "critical"  ? "Nguy hiểm — can thiệp ngay" :
+                "Tính theo ngưỡng từng cây"
+              }
+            />
+            <StatCard
+              label="RỦI RO" value={risk ? riskLabel(risk) : "—"}
+              Icon={AlertTriangle} color={risk ? riskColor(risk) : "#a78bfa"}
+              sub="Yield + môi trường"
+            />
+            <StatCard
+              label="NĂNG SUẤT" value={yieldTan} suffix=" tấn/ha"
+              Icon={TrendingUp} color="#60a5fa"
+              barPct={yieldKg != null ? (yieldKg / TARGET_YIELD_KG) * 100 : null}
+              sub={safeMin != null
+                ? `±${diag.uncertainty_margin ?? ""} · ${(safeMin/1000).toFixed(1)}–${(safeMax/1000).toFixed(1)} tấn`
+                : "Dự báo XGBoost"}
+            />
+            <StatCard
+              label="TÁC ĐỘNG KHÍ HẬU"
+              value={diag.weather_impact_ratio != null ? Math.round(diag.weather_impact_ratio * 100) : null}
+              suffix="%"
+              Icon={Activity} color="#a78bfa"
+              barPct={diag.weather_impact_ratio != null ? diag.weather_impact_ratio * 100 : null}
+              sub={diag.base_yield_source ?? "Nguồn dữ liệu"}
+            />
           </div>
-        </>
-      )}
 
-      {recs.length === 0 && aiAnalysis && (
-        <>
           <Divider />
-          <div style={{ borderRadius:12, padding:"14px 18px", border:"1px solid rgba(34,197,94,.2)",
-            background:"rgba(34,197,94,.06)", display:"flex", alignItems:"center", gap:12 }}>
-            <Sparkles size={20} color="#4ade80" />
-            <div>
-              <div style={{ fontSize:13, fontWeight:500, color:"#86efac" }}>Điều kiện tốt — không cần can thiệp</div>
-              <div style={{ fontSize:12, color:"rgba(255,255,255,.4)", marginTop:2 }}>
-                AI không phát hiện vấn đề môi trường. Giữ nguyên lịch tưới và thông gió hiện tại.
-              </div>
-            </div>
+          <SL>DỮ LIỆU CẢM BIẾN — LẤY TỪ DATABASE</SL>
+
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))", gap:10, marginBottom:4 }}>
+            <SensorCard label="NHIỆT ĐỘ"   value={T}  unit="°C" Icon={Thermometer} color="#f87171" />
+            <SensorCard label="ĐỘ ẨM KK"   value={H}  unit="%"  Icon={Droplets}    color="#60a5fa" />
+            <SensorCard label="ĐỘ ẨM ĐẤT"  value={SM} unit="%"  Icon={Droplets}    color="#4ade80" />
+            <SensorCard
+              label="CẬP NHẬT LÚC"
+              value={sensor?.timestamp
+                ? new Date(sensor.timestamp).toLocaleTimeString("vi-VN", { hour:"2-digit", minute:"2-digit" })
+                : null}
+              unit="" Icon={Clock} color="#fbbf24"
+            />
           </div>
+
+          {/* Health breakdown theo ngưỡng từng loại cây */}
+          {healthBreakdown.length > 0 && (
+            <HealthBreakdown
+              breakdown={healthBreakdown}
+              thresholds={thresholdsUsed}
+              cropName={thresholdsUsed?.crop ?? selectedCrop?.crop_name}
+            />
+          )}
+
+          {/* Expert advice */}
+          {advice.length > 0 && (
+            <>
+              <Divider />
+              <SL>NHẬN XÉT CHUYÊN GIA — AI ENGINE</SL>
+              {advice.map((a, i) => <AdviceCard key={i} text={a} />)}
+            </>
+          )}
+
+          {/* Recommendations */}
+          {recs.length > 0 && (
+            <>
+              <Divider />
+
+              {gap != null && gap > 0 && (
+                <div style={{ borderRadius:14, padding:"18px 20px", border:"1px solid rgba(239,68,68,.25)",
+                  background:"rgba(239,68,68,.07)", display:"flex", alignItems:"center",
+                  justifyContent:"space-between", gap:16, flexWrap:"wrap", marginBottom:14 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                    <div style={{ width:44, height:44, borderRadius:11, background:"rgba(239,68,68,.18)",
+                      display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                      <TrendingDown size={22} color="#f87171" />
+                    </div>
+                    <div>
+                      <span style={{ fontSize:10, fontWeight:500, letterSpacing:".06em", padding:"2px 8px",
+                        borderRadius:99, background:"rgba(239,68,68,.15)", color:"#f87171",
+                        border:"1px solid rgba(239,68,68,.25)", marginBottom:6, display:"inline-block" }}>
+                        AI PHÁT HIỆN
+                      </span>
+                      <div style={{ fontSize:15, fontWeight:500, color:"#fca5a5" }}>Năng suất thấp hơn kỳ vọng</div>
+                      <div style={{ fontSize:12, color:"rgba(255,255,255,.4)", marginTop:3 }}>
+                        Còn thiếu {(gap/1000).toFixed(1)} tấn/ha — {recs.length} hành động có thể cải thiện
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display:"flex", gap:20, flexShrink:0 }}>
+                    <div style={{ textAlign:"center" }}>
+                      <div style={{ fontSize:22, fontWeight:500, color:"#f87171" }}>{yieldTan ?? "—"}</div>
+                      <div style={{ fontSize:11, color:"rgba(255,255,255,.35)", marginTop:2 }}>tấn/ha hiện tại</div>
+                    </div>
+                    <div style={{ width:1, background:"rgba(255,255,255,.08)" }} />
+                    <div style={{ textAlign:"center" }}>
+                      <div style={{ fontSize:22, fontWeight:500, color:"#4ade80" }}>{targetTan}</div>
+                      <div style={{ fontSize:11, color:"rgba(255,255,255,.35)", marginTop:2 }}>tấn/ha mục tiêu</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <SL>HÀNH ĐỘNG ĐỀ XUẤT — ƯU TIÊN CAO NHẤT TRƯỚC</SL>
+              {recs.map((rec, i) => (
+                <RecCard key={i} rec={rec} idx={i} onAction={handleAction} />
+              ))}
+
+              <div style={{ borderRadius:12, padding:"14px 18px", border:"1px solid rgba(34,197,94,.2)",
+                background:"rgba(34,197,94,.06)", display:"flex", alignItems:"center",
+                gap:14, flexWrap:"wrap" }}>
+                <div style={{ width:38, height:38, borderRadius:9, background:"rgba(34,197,94,.15)",
+                  display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <Sparkles size={19} color="#4ade80" />
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:13, fontWeight:500, color:"#86efac", marginBottom:2 }}>
+                    Áp dụng tất cả → dự báo đạt {projectedKg != null ? (projectedKg/1000).toFixed(1) : "—"} tấn/ha
+                  </div>
+                  <div style={{ fontSize:12, color:"rgba(255,255,255,.4)" }}>
+                    Tăng +{(totalImpact/1000).toFixed(1)} tấn/ha · thời gian thấy hiệu quả: 2–3 tuần
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleAction("Áp dụng tất cả thay đổi: " + recs.map(r=>r.title).join(", "))}
+                  style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:12, fontWeight:500,
+                    padding:"8px 14px", borderRadius:8, cursor:"pointer", whiteSpace:"nowrap",
+                    background:"rgba(34,197,94,.2)", border:"1px solid rgba(34,197,94,.35)", color:"#4ade80" }}>
+                  Áp dụng tất cả →
+                </button>
+              </div>
+            </>
+          )}
+
+          {recs.length === 0 && aiAnalysis && (
+            <>
+              <Divider />
+              <div style={{ borderRadius:12, padding:"14px 18px", border:"1px solid rgba(34,197,94,.2)",
+                background:"rgba(34,197,94,.06)", display:"flex", alignItems:"center", gap:12 }}>
+                <Sparkles size={20} color="#4ade80" />
+                <div>
+                  <div style={{ fontSize:13, fontWeight:500, color:"#86efac" }}>Điều kiện tốt — không cần can thiệp</div>
+                  <div style={{ fontSize:12, color:"rgba(255,255,255,.4)", marginTop:2 }}>
+                    AI không phát hiện vấn đề môi trường. Giữ nguyên lịch tưới và thông gió hiện tại.
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </>
       )}
 
