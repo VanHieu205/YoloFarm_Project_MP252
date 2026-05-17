@@ -1,27 +1,31 @@
 [ DATA INFORMATION ]
-Train Samples :      33353 samples
-Test Samples  :       8339 samples
-Features      :          7 features
-====================================================
 
-[ MODEL: RF ]
-Parameters     : n_estimators=11, random_state=42
-----------------------------------------------------
-R^2 Train      :     0.6651
-R^2 Test       :     0.6628
-Adj. R^2 Test  :     0.6625
-Gap Difference :     0.0023
-MAE (Test)     :     0.1767
-RMSE (Test)    :     0.2397
-====================================================
+Train Samples :      37922 samples
+Test Samples  :       9481 samples
+Features      :         94 features
 
-[ MODEL: XGB ]
-Parameters     : n_estimators=500, learning_rate=0.05, max_depth=6
+[ TUNING PROCESS ]
+
+Coarse Params : {'subsample': 0.6, 'n_estimators': 500, 'max_depth': 7, 'learning_rate': 0.01, 'colsample_bytree': 0.6}
+Fine Params   : {'colsample_bytree': 0.6, 'learning_rate': 0.01, 'max_depth': 7, 'n_estimators': 500, 'subsample': 0.6}
+
+[ EVALUATION METRICS ]
+
+R^2 Train      :     0.6709
+R^2 Test       :     0.6560
+5-Fold CV R^2  :     0.6612
+Gap Difference :     0.0149
+
 ----------------------------------------------------
-R^2 Train      :     0.6645
-R^2 Test       :     0.6688
-Adj. R^2 Test  :     0.6685
-Gap Difference :     0.0043
-MAE (Test)     :     0.1755
-RMSE (Test)    :     0.2376
-====================================================
+
+MAE (Test)     :    51.1957
+RMSE (Test)    :   530.0620
+
+[ MODEL CONFIGURATION ]
+
+Algorithm      : XGBoost Regressor
+Learning Rate  : 0.01
+Max Depth      : 7
+N Estimators   : 500
+Subsample      : 0.6
+Colsample      : 0.6
