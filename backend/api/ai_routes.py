@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from typing import Optional
 import uuid
-import json
 from datetime import datetime
 
 from ML.ai_engine import YieldPredictor
@@ -15,7 +15,7 @@ ai_predictor = YieldPredictor(models_dir="../ML/models")
 class PredictRequest(BaseModel):
     user_id: str
     crop_name: str
-    manual_season: str = None
+    manual_season: Optional[str] = None   # ← sửa: thêm Optional để nhận null từ frontend
 
 
 @router.post("/predict")
@@ -44,8 +44,8 @@ def get_prediction_and_advice(req: PredictRequest):
                 detail="Không tìm thấy dữ liệu cảm biến cho người dùng này."
             )
 
-        temp = latest_sensor['temperature']
-        humid = latest_sensor['humidity']
+        temp       = latest_sensor['temperature']
+        humid      = latest_sensor['humidity']
         soil_moist = latest_sensor['soil_moisture']
         sensor_time = latest_sensor['timestamp']
 
@@ -68,26 +68,43 @@ def get_prediction_and_advice(req: PredictRequest):
 
         prediction_result['expert_advice'] = advice_list
 
+        # Lưu lịch sử dự đoán
         prediction_id = str(uuid.uuid4())
-
-        insert_query = """
-        INSERT INTO ai_prediction_history (
-            id, user_id, crop_name, temperature, humidity, soil_moisture, 
-            predicted_min, predicted_max, advices
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
 
         if isinstance(sensor_time, datetime):
             sensor_time = sensor_time.strftime("%Y-%m-%d %H:%M:%S")
+
+        try:
+            insert_query = """
+                INSERT INTO ai_prediction_history (
+                    id, user_id, crop_name, temperature, humidity, soil_moisture,
+                    predicted_min, predicted_max, advices
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, (
+                prediction_id,
+                req.user_id,
+                req.crop_name,
+                temp,
+                humid,
+                soil_moist,
+                prediction_result['safe_range']['min'],
+                prediction_result['safe_range']['max'],
+                str(advice_list),
+            ))
+            connect.commit()
+        except Exception:
+            # Không để lỗi INSERT phá vỡ response chính
+            pass
 
         return {
             "success": True,
             "sensor_data_used": {
                 "temperature": temp,
-                "humidity": humid,
+                "humidity":    humid,
                 "soil_moisture": soil_moist,
-                "timestamp": sensor_time
+                "timestamp":   sensor_time
             },
             "ai_analysis": prediction_result
         }
