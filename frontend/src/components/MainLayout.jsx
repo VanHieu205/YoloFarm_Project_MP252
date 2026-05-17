@@ -8,7 +8,8 @@ import {
   Zap,
   BarChart3,
   Users,
-  Sprout
+  Sprout,
+  Brain
 } from 'lucide-react'
 import '../styles/layout.css'
 
@@ -30,6 +31,7 @@ export default function MainLayout({ children }) {
   { path: '/automation', label: 'Tự động hóa', icon: <Zap /> },
   { path: '/farm', label: 'Mùa vụ', icon: <Sprout /> },
   { path: '/reports', label: 'Báo cáo', icon: <BarChart3 /> },
+  { path: '/AIAnalysis', label: 'AI Analysis', icon: <Brain /> },
 ]
 
   const adminItems = [
