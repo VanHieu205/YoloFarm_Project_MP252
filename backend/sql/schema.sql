@@ -223,6 +223,37 @@ CREATE TABLE harvest_yields (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (crop_id) REFERENCES crops(crop_id) ON DELETE CASCADE
 );
+
+-- =============================================
+-- 12. CHATBOT HISTORY
+-- =============================================
+CREATE TABLE chatbot_history (
+    chat_id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    user_message TEXT NOT NULL,
+    bot_response LONGTEXT NOT NULL,
+    context_count INT DEFAULT 0,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- =============================================
+-- 13. AI PREDICTION HISTORY
+-- =============================================
+CREATE TABLE ai_prediction_history (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    crop_name VARCHAR(100),
+    temperature FLOAT,
+    humidity FLOAT,
+    soil_moisture FLOAT,
+    predicted_min FLOAT,
+    predicted_max FLOAT,
+    advices LONGTEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
 -- =============================================
 -- INDEXES
 -- =============================================
@@ -230,5 +261,10 @@ CREATE INDEX idx_sensor_device_time ON sensor_readings(device_id, timestamp);
 CREATE INDEX idx_sensor_crop ON sensor_readings(crop_id);
 CREATE INDEX idx_alert_device ON alerts(device_id, created_at);
 CREATE INDEX idx_ai_rec_prediction ON ai_recommendations(prediction_id);
-CREATE INDEX idx_alert_crop        ON alerts(crop_id);       
+CREATE INDEX idx_alert_crop ON alerts(crop_id);
 CREATE INDEX idx_crop_devices_device ON crop_devices(device_id);
+
+CREATE INDEX idx_crop_device ON crops(device_id);
+CREATE INDEX idx_ai_actions_rec ON ai_actions(recommendation_id);
+CREATE INDEX idx_chatbot_user ON chatbot_history(user_id, timestamp);
+CREATE INDEX idx_ai_prediction_user ON ai_prediction_history(user_id, timestamp);

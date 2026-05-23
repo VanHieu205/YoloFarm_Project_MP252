@@ -18,8 +18,8 @@ function calcRisk(healthScore, yieldKg) {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
-const healthColor = s => s >= 80 ? "#4ade80" : s >= 50 ? "#fbbf24" : "#f87171"
-const riskColor   = r => ({ low:"#4ade80", medium:"#fbbf24", high:"#f87171" })[r] ?? "#a78bfa"
+const healthColor = s => s >= 80 ? "#10b981" : s >= 50 ? "#f59e0b" : "#ef4444"
+const riskColor   = r => ({ low:"#10b981", medium:"#f59e0b", high:"#ef4444" })[r] ?? "#8b5cf6"
 const riskLabel   = r => ({ low:"Thấp", medium:"Trung bình", high:"Cao" })[r] ?? "—"
 
 // ─── Sinh gợi ý từ expert_advice + sensor thật ────────────────────────────
@@ -31,89 +31,81 @@ function buildRecs(sensor, expertAdvice = []) {
 
   if (SM != null && SM < 40)
     recs.push({
-      color:"#f87171", bg:"rgba(239,68,68,.07)", border:"rgba(239,68,68,.2)", iconBg:"rgba(239,68,68,.18)",
+      color:"#ef4444", bg:"rgba(239,68,68,.06)", border:"rgba(239,68,68,.3)", iconBg:"rgba(239,68,68,.15)",
       icon: Droplets, priority:"KHẨN CẤP",
       title: "Đất đang khô hạn — kích hoạt máy bơm",
       why: `Độ ẩm đất ${SM}% thấp hơn ngưỡng an toàn 40%. AI cảnh báo nguy cơ mất năng suất cao nếu không tưới ngay.`,
       impact: 900,
       actions: [
-        { label:"Bật bơm ngay",   icon:Play, prompt:"Bật máy bơm ngay bây giờ" },
         { label:"Tạo automation", icon:Bot,  prompt:"Cài automation tự động bật máy bơm khi độ ẩm đất xuống dưới 40%" },
       ],
     })
   else if (SM != null && SM < 50)
     recs.push({
-      color:"#60a5fa", bg:"rgba(59,130,246,.07)", border:"rgba(59,130,246,.2)", iconBg:"rgba(59,130,246,.18)",
+      color:"#3b82f6", bg:"rgba(59,130,246,.06)", border:"rgba(59,130,246,.3)", iconBg:"rgba(59,130,246,.15)",
       icon: Droplets, priority:"ƯU TIÊN CAO",
       title: "Điều chỉnh lịch máy bơm tưới",
       why: `Độ ẩm đất ${SM}% — thấp hơn ngưỡng 50–60% tối ưu. Tăng tần suất tưới buổi sáng sớm.`,
       impact: 500,
       actions: [
-        { label:"Đổi lịch tưới",  icon:Clock, prompt:"Thay đổi lịch tưới máy bơm để tăng độ ẩm đất lên 50–60%" },
         { label:"Tạo automation", icon:Bot,   prompt:"Cài automation tự động bật máy bơm khi độ ẩm đất xuống dưới 50%" },
-        { label:"Bật bơm ngay",   icon:Play,  prompt:"Bật máy bơm ngay bây giờ" },
       ],
     })
 
   if (SM != null && SM > 80)
     recs.push({
-      color:"#f87171", bg:"rgba(239,68,68,.07)", border:"rgba(239,68,68,.2)", iconBg:"rgba(239,68,68,.18)",
+      color:"#ef4444", bg:"rgba(239,68,68,.06)", border:"rgba(239,68,68,.3)", iconBg:"rgba(239,68,68,.15)",
       icon: Droplets, priority:"KHẨN CẤP",
       title: "Đất ngập úng — khơi thông thoát nước",
       why: `Độ ẩm đất ${SM}% vượt ngưỡng 80%, nguy cơ thối rễ cao. Cần tắt máy bơm và kiểm tra hệ thống thoát nước.`,
       impact: 800,
       actions: [
-        { label:"Tắt máy bơm",    icon:Play, prompt:"Tắt máy bơm ngay bây giờ" },
         { label:"Automation ngập",icon:Bot,  prompt:"Tạo automation tắt máy bơm khi độ ẩm đất vượt quá 80%" },
       ],
     })
 
   if (T != null && T > 35)
     recs.push({
-      color:"#f87171", bg:"rgba(239,68,68,.07)", border:"rgba(239,68,68,.2)", iconBg:"rgba(239,68,68,.18)",
+      color:"#ef4444", bg:"rgba(239,68,68,.06)", border:"rgba(239,68,68,.3)", iconBg:"rgba(239,68,68,.15)",
       icon: Thermometer, priority:"KHẨN CẤP",
       title: "Nhiệt độ quá cao — stress nhiệt",
       why: `Nhiệt độ ${T}°C vượt ngưỡng 35°C gây stress nhiệt nghiêm trọng. Cần bật quạt và phun sương làm mát ngay.`,
       impact: 700,
       actions: [
-        { label:"Bật quạt ngay",    icon:Play, prompt:"Bật quạt thông gió ngay bây giờ" },
         { label:"Automation nhiệt", icon:Bot,  prompt:"Tạo automation bật quạt và phun sương khi nhiệt độ vượt quá 35°C" },
       ],
     })
   else if (T != null && T > 28)
     recs.push({
-      color:"#fbbf24", bg:"rgba(251,191,36,.07)", border:"rgba(251,191,36,.2)", iconBg:"rgba(251,191,36,.18)",
+      color:"#f59e0b", bg:"rgba(245,158,11,.06)", border:"rgba(245,158,11,.3)", iconBg:"rgba(245,158,11,.15)",
       icon: Wind, priority:"ƯU TIÊN TRUNG BÌNH",
       title: "Tối ưu lịch chạy quạt thông gió",
       why: `Nhiệt độ ${T}°C — có thể tăng 31–33°C buổi trưa. Bật quạt sớm hơn 1 giờ và tăng tốc độ 20%.`,
       impact: 300,
       actions: [
-        { label:"Đổi lịch quạt",       icon:Clock, prompt:"Thay đổi lịch quạt thông gió: bật lúc 10h, tắt lúc 14h30, tốc độ 80%" },
         { label:"Automation nhiệt độ", icon:Bot,   prompt:"Tạo automation bật quạt khi nhiệt độ vượt quá 30 độ C" },
       ],
     })
 
   if (H != null && H < 40)
     recs.push({
-      color:"#f87171", bg:"rgba(239,68,68,.07)", border:"rgba(239,68,68,.2)", iconBg:"rgba(239,68,68,.18)",
+      color:"#ef4444", bg:"rgba(239,68,68,.06)", border:"rgba(239,68,68,.3)", iconBg:"rgba(239,68,68,.15)",
       icon: Droplets, priority:"ƯU TIÊN CAO",
       title: "Độ ẩm không khí quá thấp",
       why: `Độ ẩm ${H}% — quá thấp, cây bốc hơi nước mạnh, giảm quang hợp. Bật phun sương ngay.`,
       impact: 400,
       actions: [
-        { label:"Bật phun sương",   icon:Play, prompt:"Bật hệ thống phun sương ngay bây giờ" },
         { label:"Automation độ ẩm", icon:Bot,  prompt:"Tạo automation bật phun sương khi độ ẩm không khí xuống dưới 40%" },
       ],
     })
   else if (H != null && H < 60)
     recs.push({
-      color:"#2dd4bf", bg:"rgba(20,184,166,.07)", border:"rgba(20,184,166,.2)", iconBg:"rgba(20,184,166,.18)",
+      color:"#06b6d4", bg:"rgba(6,182,212,.06)", border:"rgba(6,182,212,.3)", iconBg:"rgba(6,182,212,.15)",
       icon: Droplets, priority:"BỔ SUNG",
       title: "Tăng độ ẩm không khí",
       why: `Độ ẩm không khí ${H}% thấp hơn mức lý tưởng 65–80%. Phun sương buổi sáng giúp giảm thoát hơi nước.`,
       impact: 200,
       actions: [
-        { label:"Lên lịch phun sương",  icon:Clock, prompt:"Lên lịch bật hệ thống phun sương buổi sáng 7h–9h để tăng độ ẩm không khí" },
         { label:"Automation độ ẩm KK",  icon:Bot,   prompt:"Tạo automation bật phun sương khi độ ẩm không khí xuống dưới 60%" },
       ],
     })
@@ -124,11 +116,11 @@ function buildRecs(sensor, expertAdvice = []) {
 // ─── Atoms ────────────────────────────────────────────────────────────────
 const SL = ({ children }) => (
   <div style={{ fontSize:11, fontWeight:500, letterSpacing:".08em",
-    color:"rgba(255,255,255,.35)", marginBottom:10 }}>{children}</div>
+    color:"rgba(0,0,0,.4)", marginBottom:10 }}>{children}</div>
 )
 
 const Divider = () => (
-  <div style={{ borderTop:"1px solid rgba(255,255,255,.06)", margin:"1rem 0" }} />
+  <div style={{ borderTop:"1px solid rgba(0,0,0,.08)", margin:"1rem 0" }} />
 )
 
 const StatCard = ({ label, value, suffix="", Icon, color, sub, barPct }) => (
@@ -169,12 +161,12 @@ const AdviceCard = ({ text }) => {
   const isWarning  = text.startsWith("CẢNH BÁO")
   const isGood     = text.startsWith("TỐT")
   const isAnalysis = text.startsWith("PHÂN TÍCH")
-  const color = isWarning ? "#f87171" : isGood ? "#4ade80" : isAnalysis ? "#fbbf24" : "#a78bfa"
-  const bg    = isWarning ? "rgba(239,68,68,.08)" : isGood ? "rgba(34,197,94,.08)" : isAnalysis ? "rgba(251,191,36,.08)" : "rgba(139,92,246,.08)"
+  const color = isWarning ? "#ef4444" : isGood ? "#10b981" : isAnalysis ? "#f59e0b" : "#8b5cf6"
+  const bg    = isWarning ? "rgba(239,68,68,.08)" : isGood ? "rgba(16,185,129,.08)" : isAnalysis ? "rgba(245,158,11,.08)" : "rgba(139,92,246,.08)"
   return (
     <div style={{ borderRadius:9, padding:"10px 14px", background:bg,
       borderLeft:`3px solid ${color}`, marginBottom:8,
-      fontSize:12, color:"rgba(255,255,255,.7)", lineHeight:1.6 }}>
+      fontSize:12, color:"rgba(0,0,0,.65)", lineHeight:1.6 }}>
       {text}
     </div>
   )
@@ -182,24 +174,24 @@ const AdviceCard = ({ text }) => {
 
 // ─── Health Breakdown ──────────────────────────────────────────────────────
 const statusMeta = {
-  good:          { color:"#4ade80", label:"Tốt" },
-  warning:       { color:"#fbbf24", label:"Cảnh báo" },
-  critical_high: { color:"#f87171", label:"Quá cao" },
-  critical_low:  { color:"#f87171", label:"Quá thấp" },
+  good:          { color:"#10b981", label:"Tốt" },
+  warning:       { color:"#f59e0b", label:"Cảnh báo" },
+  critical_high: { color:"#ef4444", label:"Quá cao" },
+  critical_low:  { color:"#ef4444", label:"Quá thấp" },
 }
 const sensorLabel = { temperature:"Nhiệt độ", humidity:"Độ ẩm KK", soil_moisture:"Độ ẩm đất" }
 
 const HealthBreakdown = ({ breakdown, thresholds, cropName }) => {
   if (!breakdown || breakdown.length === 0) return null
   return (
-    <div style={{ marginTop:10, borderRadius:10, border:"1px solid rgba(255,255,255,.07)",
-      background:"rgba(255,255,255,.03)", padding:"12px 14px" }}>
+    <div style={{ marginTop:10, borderRadius:10, border:"1px solid rgba(0,0,0,.08)",
+      background:"rgba(0,0,0,.02)", padding:"12px 14px" }}>
       <div style={{ fontSize:11, fontWeight:500, letterSpacing:".06em",
-        color:"rgba(255,255,255,.3)", marginBottom:10 }}>
+        color:"rgba(0,0,0,.4)", marginBottom:10 }}>
         NGƯỠNG CỦA {(cropName ?? "").toUpperCase()}
       </div>
       {breakdown.map((b, i) => {
-        const meta = statusMeta[b.status] ?? { color:"#a78bfa", label:b.status }
+        const meta = statusMeta[b.status] ?? { color:"#8b5cf6", label:b.status }
         const isOk = b.status === "good"
         return (
           <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:10,
@@ -209,21 +201,21 @@ const HealthBreakdown = ({ breakdown, thresholds, cropName }) => {
               flexShrink:0, marginTop:5 }} />
             <div style={{ flex:1 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <span style={{ fontSize:12, color:"rgba(255,255,255,.55)" }}>
+                <span style={{ fontSize:12, color:"rgba(0,0,0,.6)" }}>
                   {sensorLabel[b.sensor] ?? b.sensor}
                 </span>
                 <span style={{ fontSize:11, color:meta.color, fontWeight:500 }}>
                   {isOk ? "✓" : `−${b.deducted} điểm`}
                 </span>
               </div>
-              <div style={{ fontSize:11, color: isOk ? "rgba(255,255,255,.3)" : "rgba(255,255,255,.5)",
+              <div style={{ fontSize:11, color: isOk ? "rgba(0,0,0,.4)" : "rgba(0,0,0,.6)",
                 marginTop:2, lineHeight:1.5 }}>
                 {b.message}
               </div>
               {/* Mini threshold bar */}
               {thresholds && thresholds[b.sensor] && (
                 <div style={{ marginTop:5, position:"relative", height:4,
-                  borderRadius:99, background:"rgba(255,255,255,.08)", overflow:"visible" }}>
+                  borderRadius:99, background:"rgba(0,0,0,.08)", overflow:"visible" }}>
                   {/* Safe zone */}
                   {(() => {
                     const th = thresholds[b.sensor]
@@ -237,10 +229,10 @@ const HealthBreakdown = ({ breakdown, thresholds, cropName }) => {
                     return (
                       <>
                         <div style={{ position:"absolute", left:`${safeLeft}%`, width:`${safeWidth}%`,
-                          height:"100%", background:"rgba(74,222,128,.25)", borderRadius:99 }} />
+                          height:"100%", background:"rgba(16,185,129,.25)", borderRadius:99 }} />
                         <div style={{ position:"absolute", left:`${valPct}%`, top:-2,
                           width:8, height:8, borderRadius:99, background:meta.color,
-                          transform:"translateX(-50%)", border:"1px solid rgba(0,0,0,.4)" }} />
+                          transform:"translateX(-50%)", border:"1px solid rgba(0,0,0,.2)" }} />
                       </>
                     )
                   })()}
@@ -272,7 +264,7 @@ const RecCard = ({ rec, idx, onAction }) => {
           <div style={{ fontSize:14, fontWeight:500, color:rec.color }}>{rec.title}</div>
         </div>
       </div>
-      <p style={{ fontSize:12, color:"rgba(255,255,255,.45)", lineHeight:1.6,
+      <p style={{ fontSize:12, color:"rgba(0,0,0,.5)", lineHeight:1.6,
         margin:"0 0 12px 50px" }}>{rec.why}</p>
       <div style={{ display:"flex", flexWrap:"wrap", gap:8, paddingLeft:50 }}>
         {rec.actions.map((a, i) => {
@@ -281,8 +273,8 @@ const RecCard = ({ rec, idx, onAction }) => {
             <button key={i} onClick={() => onAction?.(a.prompt)}
               style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:12, fontWeight:500,
                 padding:"7px 12px", borderRadius:8, cursor:"pointer",
-                border:`1px solid ${rec.color}${i===0?"4d":"2e"}`,
-                background:`${rec.color}${i===0?"26":"0d"}`,
+                border:`1px solid ${rec.color}4d`,
+                background:`${rec.color}26`,
                 color:rec.color }}>
               <AIcon size={13} /> {a.label}
             </button>
@@ -293,8 +285,8 @@ const RecCard = ({ rec, idx, onAction }) => {
         padding:"10px 14px", borderRadius:8, background:`${rec.color}0a`,
         borderLeft:`3px solid ${rec.color}` }}>
         <TrendingUp size={14} color={rec.color} />
-        <span style={{ fontSize:11, color:"rgba(255,255,255,.4)" }}>Dự kiến tác động</span>
-        <span style={{ fontSize:12, fontWeight:500, color:"#4ade80", marginLeft:"auto" }}>
+        <span style={{ fontSize:11, color:"rgba(0,0,0,.4)" }}>Dự kiến tác động</span>
+        <span style={{ fontSize:12, fontWeight:500, color:"#10b981", marginLeft:"auto" }}>
           +{(rec.impact/1000).toFixed(1)} tấn/ha
         </span>
       </div>
@@ -303,13 +295,11 @@ const RecCard = ({ rec, idx, onAction }) => {
 }
 
 // ─── Crop Selector ────────────────────────────────────────────────────────
-// ─── Crop Selector ────────────────────────────────────────────────────────
 const CropSelector = ({ crops, selected, onChange, loading }) => (
   <div style={{ position:"relative", display:"inline-flex", alignItems:"center" }}>
     <select
-      value={selected} // Đang nhận vào crop_id dưới dạng string
+      value={selected}
       onChange={e => {
-        // Tìm lại object crop hoàn chỉnh dựa trên crop_id được chọn
         const selectedId = e.target.value;
         const selectedCropObj = crops.find(c => String(c.crop_id) === selectedId);
         onChange(selectedCropObj); 
@@ -320,9 +310,9 @@ const CropSelector = ({ crops, selected, onChange, loading }) => (
         fontSize:12, fontWeight:500,
         padding:"6px 32px 6px 12px",
         borderRadius:8,
-        background:"rgba(255,255,255,.06)",
-        border:"1px solid rgba(255,255,255,.15)",
-        color: loading ? "rgba(255,255,255,.3)" : "rgba(255,255,255,.85)",
+        background:"rgba(0,0,0,.04)",
+        border:"1px solid rgba(0,0,0,.15)",
+        color: loading ? "rgba(0,0,0,.35)" : "rgba(0,0,0,.75)",
         cursor: loading ? "not-allowed" : "pointer",
         outline:"none", minWidth:140,
       }}
@@ -330,14 +320,13 @@ const CropSelector = ({ crops, selected, onChange, loading }) => (
       {loading && <option value="">Đang tải...</option>}
       {!loading && crops.length === 0 && <option value="">Không có cây trồng</option>}
       {crops.map(c => (
-        // SỬA Ở ĐÂY: value phải là crop_id để đồng nhất với prop 'selected'
         <option key={c.crop_id} value={String(c.crop_id)} 
-          style={{ background:"#1a1f35", color:"#f1f5f9" }}>
+          style={{ background:"#ffffff", color:"#1f2937" }}>
           {c.crop_name}{c.variety ? ` — ${c.variety}` : ""}
         </option>
       ))}
     </select>
-    <ChevronDown size={13} color="rgba(255,255,255,.4)"
+    <ChevronDown size={13} color="rgba(0,0,0,.4)"
       style={{ position:"absolute", right:10, pointerEvents:"none" }} />
   </div>
 )
@@ -449,20 +438,20 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
     : "—"
 
   return (
-    <div style={{ background:"#0a0f1e", padding:"1rem", minHeight:"100vh",
-      fontFamily:"system-ui,sans-serif", color:"#f1f5f9" }}>
+    <div style={{ background:"#ffffff", padding:"1rem", minHeight:"100vh",
+      fontFamily:"system-ui,sans-serif", color:"#1f2937" }}>
 
       {/* Header */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
         marginBottom:"1.25rem", flexWrap:"wrap", gap:10 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:36, height:36, borderRadius:10, background:"rgba(139,92,246,.25)",
-            border:"1px solid rgba(139,92,246,.4)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <Brain size={18} color="#a78bfa" />
+          <div style={{ width:36, height:36, borderRadius:10, background:"rgba(139,92,246,.15)",
+            border:"1px solid rgba(139,92,246,.3)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <Brain size={18} color="#8b5cf6" />
           </div>
           <div>
             <p style={{ fontWeight:500, fontSize:15, margin:0 }}>Phân tích AI</p>
-            <p style={{ fontSize:11, color:"rgba(255,255,255,.4)", margin:0 }}>
+            <p style={{ fontSize:11, color:"rgba(0,0,0,.4)", margin:0 }}>
               {lastUpdated
                 ? `Cập nhật lúc ${lastUpdated.toLocaleTimeString("vi-VN")}`
                 : "Chưa có dữ liệu"}
@@ -481,20 +470,20 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
 
           {diag.season_detected && (
             <span style={{ fontSize:11, padding:"3px 10px", borderRadius:99,
-              background:"rgba(167,139,250,.12)", color:"#a78bfa",
-              border:"1px solid rgba(167,139,250,.2)" }}>
+              background:"rgba(139,92,246,.12)", color:"#7c3aed",
+              border:"1px solid rgba(139,92,246,.3)" }}>
               {diag.season_detected}
             </span>
           )}
           <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:11, padding:"3px 10px",
-            borderRadius:99, fontWeight:500, background:"rgba(34,197,94,.12)", color:"#4ade80",
-            border:"1px solid rgba(34,197,94,.2)" }}>
-            <span style={{ width:6, height:6, borderRadius:99, background:"#4ade80" }} /> Live
+            borderRadius:99, fontWeight:500, background:"rgba(16,185,129,.12)", color:"#059669",
+            border:"1px solid rgba(16,185,129,.3)" }}>
+            <span style={{ width:6, height:6, borderRadius:99, background:"#059669" }} /> Live
           </span>
           <button onClick={() => fetchData(true)} disabled={refreshing || !selectedCrop}
             style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:12, padding:"6px 12px",
-              borderRadius:8, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)",
-              color:"rgba(255,255,255,.6)", cursor:"pointer", opacity: refreshing ? .5 : 1 }}>
+              borderRadius:8, background:"rgba(0,0,0,.05)", border:"1px solid rgba(0,0,0,.1)",
+              color:"rgba(0,0,0,.6)", cursor:"pointer", opacity: refreshing ? .5 : 1 }}>
             <RefreshCw size={13} style={{ animation: refreshing ? "spin 1s linear infinite" : "none" }} />
             Làm mới
           </button>
@@ -505,8 +494,8 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
       {cropsLoading && (
         <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
           justifyContent:"center", gap:16, padding:"4rem 0" }}>
-          <Brain size={40} color="#a78bfa" style={{ animation:"spin 2s linear infinite" }} />
-          <p style={{ margin:0, fontSize:14, color:"rgba(255,255,255,.4)" }}>
+          <Brain size={40} color="#8b5cf6" style={{ animation:"spin 2s linear infinite" }} />
+          <p style={{ margin:0, fontSize:14, color:"rgba(0,0,0,.4)" }}>
             Đang tải danh sách cây trồng…
           </p>
         </div>
@@ -516,8 +505,8 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
       {!cropsLoading && loading && (
         <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
           justifyContent:"center", gap:16, padding:"4rem 0" }}>
-          <Brain size={40} color="#a78bfa" style={{ animation:"spin 2s linear infinite" }} />
-          <p style={{ margin:0, fontSize:14, color:"rgba(255,255,255,.4)" }}>
+          <Brain size={40} color="#8b5cf6" style={{ animation:"spin 2s linear infinite" }} />
+          <p style={{ margin:0, fontSize:14, color:"rgba(0,0,0,.4)" }}>
             AI đang phân tích {cropDisplayName}…
           </p>
         </div>
@@ -525,7 +514,7 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
 
       {/* No crop selected */}
       {!cropsLoading && !loading && !selectedCrop && (
-        <div style={{ textAlign:"center", padding:"4rem 0", color:"rgba(255,255,255,.3)", fontSize:14 }}>
+        <div style={{ textAlign:"center", padding:"4rem 0", color:"rgba(0,0,0,.3)", fontSize:14 }}>
           {cropList.length === 0
             ? "Chưa có cây trồng nào. Hãy thêm cây trong mục Mùa vụ."
             : "Chọn cây trồng để bắt đầu phân tích."}
@@ -537,20 +526,20 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
         <>
           {/* Crop badge */}
           <div style={{ marginBottom:14, display:"flex", alignItems:"center", gap:8 }}>
-            <Leaf size={14} color="#4ade80" />
-            <span style={{ fontSize:13, color:"rgba(255,255,255,.6)" }}>
+            <Leaf size={14} color="#10b981" />
+            <span style={{ fontSize:13, color:"rgba(0,0,0,.6)" }}>
               Đang phân tích:
             </span>
-            <span style={{ fontSize:13, fontWeight:500, color:"#4ade80" }}>
+            <span style={{ fontSize:13, fontWeight:500, color:"#10b981" }}>
               {cropDisplayName}
             </span>
           </div>
 
           {/* Data quality warning */}
           {isImputed && (
-            <div style={{ background:"rgba(251,191,36,.1)", border:"1px solid rgba(251,191,36,.25)",
+            <div style={{ background:"rgba(245,158,11,.1)", border:"1px solid rgba(245,158,11,.25)",
               borderRadius:10, padding:"10px 14px", marginBottom:14, fontSize:12,
-              color:"#fde68a", display:"flex", gap:8, alignItems:"center" }}>
+              color:"#b45309", display:"flex", gap:8, alignItems:"center" }}>
               <AlertTriangle size={14} />
               Một số cảm biến không có dữ liệu — AI đã dùng giá trị mặc định. Kết quả có thể sai lệch.
             </div>
@@ -559,7 +548,7 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
           {error && (
             <div style={{ background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.25)",
               borderRadius:10, padding:"10px 14px", marginBottom:14, fontSize:13,
-              color:"#fca5a5", display:"flex", gap:8, alignItems:"center" }}>
+              color:"#991b1b", display:"flex", gap:8, alignItems:"center" }}>
               <AlertTriangle size={15} /> {error}
             </div>
           )}
@@ -579,12 +568,12 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
             />
             <StatCard
               label="RỦI RO" value={risk ? riskLabel(risk) : "—"}
-              Icon={AlertTriangle} color={risk ? riskColor(risk) : "#a78bfa"}
+              Icon={AlertTriangle} color={risk ? riskColor(risk) : "#8b5cf6"}
               sub="Yield + môi trường"
             />
             <StatCard
               label="NĂNG SUẤT" value={yieldTan} suffix=" tấn/ha"
-              Icon={TrendingUp} color="#60a5fa"
+              Icon={TrendingUp} color="#3b82f6"
               barPct={yieldKg != null ? (yieldKg / TARGET_YIELD_KG) * 100 : null}
               sub={safeMin != null
                 ? `±${diag.uncertainty_margin ?? ""} · ${(safeMin/1000).toFixed(1)}–${(safeMax/1000).toFixed(1)} tấn`
@@ -594,7 +583,7 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
               label="TÁC ĐỘNG KHÍ HẬU"
               value={diag.weather_impact_ratio != null ? Math.round(diag.weather_impact_ratio * 100) : null}
               suffix="%"
-              Icon={Activity} color="#a78bfa"
+              Icon={Activity} color="#8b5cf6"
               barPct={diag.weather_impact_ratio != null ? diag.weather_impact_ratio * 100 : null}
               sub={diag.base_yield_source ?? "Nguồn dữ liệu"}
             />
@@ -604,15 +593,15 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
           <SL>DỮ LIỆU CẢM BIẾN — LẤY TỪ DATABASE</SL>
 
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))", gap:10, marginBottom:4 }}>
-            <SensorCard label="NHIỆT ĐỘ"   value={T}  unit="°C" Icon={Thermometer} color="#f87171" />
-            <SensorCard label="ĐỘ ẨM KK"   value={H}  unit="%"  Icon={Droplets}    color="#60a5fa" />
-            <SensorCard label="ĐỘ ẨM ĐẤT"  value={SM} unit="%"  Icon={Droplets}    color="#4ade80" />
+            <SensorCard label="NHIỆT ĐỘ"   value={T}  unit="°C" Icon={Thermometer} color="#ef4444" />
+            <SensorCard label="ĐỘ ẨM KK"   value={H}  unit="%"  Icon={Droplets}    color="#3b82f6" />
+            <SensorCard label="ĐỘ ẨM ĐẤT"  value={SM} unit="%"  Icon={Droplets}    color="#10b981" />
             <SensorCard
               label="CẬP NHẬT LÚC"
               value={sensor?.timestamp
                 ? new Date(sensor.timestamp).toLocaleTimeString("vi-VN", { hour:"2-digit", minute:"2-digit" })
                 : null}
-              unit="" Icon={Clock} color="#fbbf24"
+              unit="" Icon={Clock} color="#f59e0b"
             />
           </div>
 
@@ -646,29 +635,29 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
                   <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                     <div style={{ width:44, height:44, borderRadius:11, background:"rgba(239,68,68,.18)",
                       display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      <TrendingDown size={22} color="#f87171" />
+                      <TrendingDown size={22} color="#ef4444" />
                     </div>
                     <div>
                       <span style={{ fontSize:10, fontWeight:500, letterSpacing:".06em", padding:"2px 8px",
-                        borderRadius:99, background:"rgba(239,68,68,.15)", color:"#f87171",
+                        borderRadius:99, background:"rgba(239,68,68,.15)", color:"#dc2626",
                         border:"1px solid rgba(239,68,68,.25)", marginBottom:6, display:"inline-block" }}>
                         AI PHÁT HIỆN
                       </span>
-                      <div style={{ fontSize:15, fontWeight:500, color:"#fca5a5" }}>Năng suất thấp hơn kỳ vọng</div>
-                      <div style={{ fontSize:12, color:"rgba(255,255,255,.4)", marginTop:3 }}>
+                      <div style={{ fontSize:15, fontWeight:500, color:"#b91c1c" }}>Năng suất thấp hơn kỳ vọng</div>
+                      <div style={{ fontSize:12, color:"rgba(0,0,0,.5)", marginTop:3 }}>
                         Còn thiếu {(gap/1000).toFixed(1)} tấn/ha — {recs.length} hành động có thể cải thiện
                       </div>
                     </div>
                   </div>
                   <div style={{ display:"flex", gap:20, flexShrink:0 }}>
                     <div style={{ textAlign:"center" }}>
-                      <div style={{ fontSize:22, fontWeight:500, color:"#f87171" }}>{yieldTan ?? "—"}</div>
-                      <div style={{ fontSize:11, color:"rgba(255,255,255,.35)", marginTop:2 }}>tấn/ha hiện tại</div>
+                      <div style={{ fontSize:22, fontWeight:500, color:"#ef4444" }}>{yieldTan ?? "—"}</div>
+                      <div style={{ fontSize:11, color:"rgba(0,0,0,.4)", marginTop:2 }}>tấn/ha hiện tại</div>
                     </div>
-                    <div style={{ width:1, background:"rgba(255,255,255,.08)" }} />
+                    <div style={{ width:1, background:"rgba(0,0,0,.08)" }} />
                     <div style={{ textAlign:"center" }}>
-                      <div style={{ fontSize:22, fontWeight:500, color:"#4ade80" }}>{targetTan}</div>
-                      <div style={{ fontSize:11, color:"rgba(255,255,255,.35)", marginTop:2 }}>tấn/ha mục tiêu</div>
+                      <div style={{ fontSize:22, fontWeight:500, color:"#10b981" }}>{targetTan}</div>
+                      <div style={{ fontSize:11, color:"rgba(0,0,0,.4)", marginTop:2 }}>tấn/ha mục tiêu</div>
                     </div>
                   </div>
                 </div>
@@ -679,18 +668,18 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
                 <RecCard key={i} rec={rec} idx={i} onAction={handleAction} />
               ))}
 
-              <div style={{ borderRadius:12, padding:"14px 18px", border:"1px solid rgba(34,197,94,.2)",
-                background:"rgba(34,197,94,.06)", display:"flex", alignItems:"center",
+              <div style={{ borderRadius:12, padding:"14px 18px", border:"1px solid rgba(16,185,129,.2)",
+                background:"rgba(16,185,129,.06)", display:"flex", alignItems:"center",
                 gap:14, flexWrap:"wrap" }}>
-                <div style={{ width:38, height:38, borderRadius:9, background:"rgba(34,197,94,.15)",
+                <div style={{ width:38, height:38, borderRadius:9, background:"rgba(16,185,129,.15)",
                   display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  <Sparkles size={19} color="#4ade80" />
+                  <Sparkles size={19} color="#10b981" />
                 </div>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontSize:13, fontWeight:500, color:"#86efac", marginBottom:2 }}>
+                  <div style={{ fontSize:13, fontWeight:500, color:"#047857", marginBottom:2 }}>
                     Áp dụng tất cả → dự báo đạt {projectedKg != null ? (projectedKg/1000).toFixed(1) : "—"} tấn/ha
                   </div>
-                  <div style={{ fontSize:12, color:"rgba(255,255,255,.4)" }}>
+                  <div style={{ fontSize:12, color:"rgba(0,0,0,.4)" }}>
                     Tăng +{(totalImpact/1000).toFixed(1)} tấn/ha · thời gian thấy hiệu quả: 2–3 tuần
                   </div>
                 </div>
@@ -698,7 +687,7 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
                   onClick={() => handleAction("Áp dụng tất cả thay đổi: " + recs.map(r=>r.title).join(", "))}
                   style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:12, fontWeight:500,
                     padding:"8px 14px", borderRadius:8, cursor:"pointer", whiteSpace:"nowrap",
-                    background:"rgba(34,197,94,.2)", border:"1px solid rgba(34,197,94,.35)", color:"#4ade80" }}>
+                    background:"rgba(16,185,129,.2)", border:"1px solid rgba(16,185,129,.35)", color:"#047857" }}>
                   Áp dụng tất cả →
                 </button>
               </div>
@@ -708,12 +697,12 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
           {recs.length === 0 && aiAnalysis && (
             <>
               <Divider />
-              <div style={{ borderRadius:12, padding:"14px 18px", border:"1px solid rgba(34,197,94,.2)",
-                background:"rgba(34,197,94,.06)", display:"flex", alignItems:"center", gap:12 }}>
-                <Sparkles size={20} color="#4ade80" />
+              <div style={{ borderRadius:12, padding:"14px 18px", border:"1px solid rgba(16,185,129,.2)",
+                background:"rgba(16,185,129,.06)", display:"flex", alignItems:"center", gap:12 }}>
+                <Sparkles size={20} color="#10b981" />
                 <div>
-                  <div style={{ fontSize:13, fontWeight:500, color:"#86efac" }}>Điều kiện tốt — không cần can thiệp</div>
-                  <div style={{ fontSize:12, color:"rgba(255,255,255,.4)", marginTop:2 }}>
+                  <div style={{ fontSize:13, fontWeight:500, color:"#047857" }}>Điều kiện tốt — không cần can thiệp</div>
+                  <div style={{ fontSize:12, color:"rgba(0,0,0,.4)", marginTop:2 }}>
                     AI không phát hiện vấn đề môi trường. Giữ nguyên lịch tưới và thông gió hiện tại.
                   </div>
                 </div>

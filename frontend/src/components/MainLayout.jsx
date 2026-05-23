@@ -9,7 +9,8 @@ import {
   BarChart3,
   Users,
   Sprout,
-  Brain
+  Brain,
+  MessageCircle
 } from 'lucide-react'
 import '../styles/layout.css'
 
@@ -32,6 +33,7 @@ export default function MainLayout({ children }) {
   { path: '/farm', label: 'Mùa vụ', icon: <Sprout /> },
   { path: '/reports', label: 'Báo cáo', icon: <BarChart3 /> },
   { path: '/AIAnalysis', label: 'AI Analysis', icon: <Brain /> },
+  { path: '/chat', label: 'Chatbot', icon: <MessageCircle /> },
 ]
 
   const adminItems = [

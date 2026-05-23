@@ -7,6 +7,7 @@ from api.device_routes import router as device_router
 from api.weather_routes import router as weather_router
 from api.automation_routes import router as autorouter
 from api.ai_routes import router as ai_router
+from api.chatbot_routes import router as chatbot_router
 app = FastAPI(
     title = "YoloFarm API System",
     description = "Backend API cho hệ thống nông nghiệp thông minh",
@@ -37,6 +38,10 @@ app.include_router(weather_router, prefix="/api/weather", tags=["Weather"])
 app.include_router(autorouter, prefix="/api/automation", tags=["Automation"])
 
 app.include_router(ai_router, prefix = "/api/ai_routes", tags = ["AI"])
+
+# Đăng ký Route của Chatbot
+app.include_router(chatbot_router, prefix = "/api/chatbot", tags = ["Chatbot"])
+
 # Đăng ký Route của Farm
 app.include_router(farm_router, prefix="/api/farm", tags=["Farm"])  
 
