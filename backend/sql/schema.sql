@@ -112,11 +112,12 @@ CREATE TABLE threshold_rules (
     sensor_type ENUM('temperature','humidity','soil_moisture','light_intensity','co2') NOT NULL,
     operator ENUM('lt', 'gt', 'lte', 'gte', 'eq') NOT NULL,
     threshold_value FLOAT NOT NULL,
-    target_device_id VARCHAR(50),
+    target_device_id VARCHAR(50) NOT NULL,
     action ENUM('turn_on','turn_off') NOT NULL,
 
     FOREIGN KEY (config_id) REFERENCES threshold_config(config_id) ON DELETE CASCADE,
-    FOREIGN KEY (target_device_id) REFERENCES devices(device_id)
+    FOREIGN KEY (target_device_id) REFERENCES devices(device_id) ON DELETE RESTRICT
+    
 );
 
 -- =============================================
@@ -139,33 +140,39 @@ CREATE TABLE alerts (
 );
 
 -- =============================================
--- 9. AI RECOMMENDATIONS
+-- 9. AI PREDICTIONS
 -- =============================================
-CREATE TABLE ai_recommendations (
-    recommendation_id VARCHAR(50) PRIMARY KEY,
+CREATE TABLE ai_predictions (
+    prediction_id VARCHAR(50) PRIMARY KEY,
     crop_id INT NOT NULL,
+
+    predicted_min_kg FLOAT,
     yield_estimated_kg FLOAT,
+    predicted_max_kg FLOAT,
     confidence_percent INT,
+
+    input_snapshot JSON,
     risk_alerts JSON,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (crop_id) REFERENCES crops(crop_id) ON DELETE CASCADE
 );
 
--- =============================================
--- 10. AI ACTIONS
--- =============================================
-CREATE TABLE ai_actions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    recommendation_id VARCHAR(50) NOT NULL,
-    priority INT,
-    action TEXT,
-    reason TEXT,
-    related_use_case VARCHAR(50),
 
-    FOREIGN KEY (recommendation_id)
-        REFERENCES ai_recommendations(recommendation_id)
-        ON DELETE CASCADE
+-- =============================================
+-- 10. AI RECOMMENDATIONS
+-- =============================================
+CREATE TABLE ai_recommendations (
+    recommendation_id VARCHAR(50) PRIMARY KEY,
+    prediction_id     VARCHAR(50) NOT NULL,
+    priority          INT,
+    action            TEXT NOT NULL,       -- "Tưới nước thêm 15 phút lúc 14:00"
+    reason            TEXT,               -- "Soil moisture đang ở 23%, thấp hơn ngưỡng 30%"
+    related_use_case  VARCHAR(50),
+    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (prediction_id) REFERENCES ai_predictions(prediction_id) ON DELETE CASCADE
 );
 -- =============================================
 -- 11. Farm management
@@ -211,4 +218,5 @@ CREATE INDEX idx_sensor_device_time ON sensor_readings(device_id, timestamp);
 CREATE INDEX idx_sensor_crop ON sensor_readings(crop_id);
 CREATE INDEX idx_alert_device ON alerts(device_id, created_at);
 CREATE INDEX idx_crop_device ON crops(device_id);
-CREATE INDEX idx_ai_actions_rec ON ai_actions(recommendation_id);
+CREATE INDEX idx_ai_rec_prediction ON ai_recommendations(prediction_id);
+CREATE INDEX idx_alert_crop        ON alerts(crop_id);              -- thiếu từ v1
