@@ -10,7 +10,7 @@ router = APIRouter()
 # GET ALL DEVICES
 # =============================================
 @router.get("/all")
-def get_all_devices(user_id: str = None):
+def get_all_devices(user_id: str | None = None):
     """
     Lấy danh sách tất cả thiết bị
     
@@ -18,9 +18,17 @@ def get_all_devices(user_id: str = None):
     - user_id: (optional) Lọc theo user
     """
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor(dictionary=True)
+
         if user_id:
             query = """
             SELECT device_id, name, type, location, connection_status, 
@@ -55,9 +63,17 @@ def get_all_devices(user_id: str = None):
 def get_device_detail(device_id: str):
     """Lấy chi tiết thiết bị"""
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor(dictionary=True)
+
         query = """
         SELECT device_id, name, type, user_id, location, connection_status,
                is_on, mode, firmware_version, last_updated, created_at
@@ -91,9 +107,17 @@ def turn_on_device(device_id: str = Body(...)):
     }
     """
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute("SELECT * FROM devices WHERE device_id = %s", (device_id,))
         device = cursor.fetchone()
         
@@ -132,9 +156,17 @@ def turn_off_device(device_id: str = Body(...)):
     }
     """
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute("SELECT * FROM devices WHERE device_id = %s", (device_id,))
         device = cursor.fetchone()
         
@@ -159,6 +191,9 @@ def turn_off_device(device_id: str = Body(...)):
 
 ############################### DASH BOARD#######################################
 # =============================================
+# =============================================
+# GET DEVICE GROUP STATUS
+# =============================================
 @router.get("/group/status")
 def get_device_group_status(user_id: str):
     """
@@ -166,9 +201,17 @@ def get_device_group_status(user_id: str):
     """
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
+
         query = """
         SELECT 
             type,
@@ -211,9 +254,17 @@ def turn_on_device_type(
 ):
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
+
         query = """
         SELECT device_id
         FROM devices
@@ -262,9 +313,17 @@ def turn_off_device_type(
 ):
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
+
         query = """
         SELECT device_id
         FROM devices
@@ -303,49 +362,6 @@ def turn_off_device_type(
 
     finally:
         close_connection(connect, cursor)
-# =============================================
-# GET DEVICE GROUP STATUS
-# =============================================
-@router.get("/group/status")
-def get_device_group_status(user_id: str):
-
-    connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
-
-    try:
-        query = """
-        SELECT 
-            type,
-            COUNT(*) as total_devices,
-            COUNT(CASE WHEN is_on = 1 THEN 1 END) as active_count
-        FROM devices
-        WHERE user_id = %s
-        GROUP BY type
-        """
-
-        cursor.execute(query, (user_id,))
-        rows = cursor.fetchall()
-
-        result = []
-
-        for row in rows:
-            active_count = row["active_count"] or 0
-
-            result.append({
-                "type": row["type"],
-                "status": "ON" if active_count > 0 else "OFF",
-                "active_count": active_count,
-                "total_devices": row["total_devices"]
-            })
-
-        return result
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-    finally:
-        close_connection(connect, cursor)
-
 
 # =============================================
 # CONTROL DEVICE GROUP
@@ -361,9 +377,16 @@ def control_device_group(
     """
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
         is_on = action == "ON"
 
         update_query = """
@@ -399,9 +422,17 @@ def get_all_automations(user_id: str):
     """
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
+
         query = """
         SELECT
             tc.config_id,
@@ -500,9 +531,16 @@ def create_automation(
     """
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
 
         config_id = str(uuid.uuid4())
 
@@ -576,9 +614,16 @@ def toggle_automation(
     """
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
 
         query = """
         SELECT is_active
@@ -633,9 +678,16 @@ def toggle_automation(
 def delete_automation(config_id: str):
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
 
         cursor.execute(
             "SELECT * FROM threshold_config WHERE config_id = %s",
@@ -677,9 +729,16 @@ def delete_automation(config_id: str):
 def get_automation_detail(config_id: str):
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
 
         query = """
         SELECT

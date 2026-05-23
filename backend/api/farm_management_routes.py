@@ -37,7 +37,7 @@ class SupplyCreate(BaseModel):
     name: str
     quantity: Optional[float] = None
     unit: Optional[str] = "kg"
-    date: Optional[date] = None
+    create_date: Optional[date] = None
 
 class YieldCreate(BaseModel):
     quantity: float
@@ -49,9 +49,18 @@ class YieldCreate(BaseModel):
 
 @router.get("/crops")
 def get_crops(user_id: str = Query(...)):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_connection()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
+
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute("""
             SELECT
                 c.*,
@@ -101,14 +110,23 @@ def get_crops(user_id: str = Query(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        close_connection(conn, cursor)
+        close_connection(connect, cursor)
 
 
 @router.post("/crops")
 def create_crop(body: CropCreate):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_connection()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
+
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute("""
             INSERT INTO crops
                 (user_id, device_id, crop_name, variety, plant_date,
@@ -118,22 +136,33 @@ def create_crop(body: CropCreate):
             body.user_id, body.device_id, body.crop_name, body.variety,
             body.plant_date, body.expected_harvest_date, body.area,
         ))
-        conn.commit()
+
+        connect.commit()
         crop_id = cursor.lastrowid
         cursor.execute("SELECT * FROM crops WHERE crop_id = %s", (crop_id,))
         return cursor.fetchone()
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        close_connection(conn, cursor)
+        close_connection(connect, cursor)
 
 
 @router.put("/crops/{crop_id}")
 def update_crop(crop_id: int, body: CropUpdate):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_connection()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
+
     try:
-        fields = {k: v for k, v in body.dict().items() if v is not None}
+        cursor = connect.cursor(dictionary=True)
+
+        fields = {k: v for k, v in body.model_dump().items() if v is not None}
         if not fields:
             raise HTTPException(status_code=400, detail="Không có trường nào để cập nhật")
 
@@ -142,90 +171,138 @@ def update_crop(crop_id: int, body: CropUpdate):
             f"UPDATE crops SET {set_clause} WHERE crop_id = %s",
             (*fields.values(), crop_id)
         )
-        conn.commit()
+        connect.commit()
         cursor.execute("SELECT * FROM crops WHERE crop_id = %s", (crop_id,))
         return cursor.fetchone()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        close_connection(conn, cursor)
+        close_connection(connect, cursor)
 
 
 @router.delete("/crops/{crop_id}")
 def delete_crop(crop_id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    connect = get_connection()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
+
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute("DELETE FROM crops WHERE crop_id = %s", (crop_id,))
-        conn.commit()
+        connect.commit()
         return {"message": "Đã xóa mùa vụ"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        close_connection(conn, cursor)
+        close_connection(connect, cursor)
 
 # ── Care Logs (Nhật ký chăm sóc) ────────────────────────────────────────────
 
 @router.post("/crops/{crop_id}/care-logs")
 def add_care_log(crop_id: int, body: CareLogCreate):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_connection()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
+
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute(
             "INSERT INTO care_logs (crop_id, date, activity, notes) VALUES (%s, %s, %s, %s)",
             (crop_id, body.date, body.activity, body.notes)
         )
-        conn.commit()
+
+        connect.commit()
         cursor.execute("SELECT * FROM care_logs WHERE id = %s", (cursor.lastrowid,))
         return cursor.fetchone()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        close_connection(conn, cursor)
+        close_connection(connect, cursor)
 
 # ── Supplies (Vật tư) ────────────────────────────────────────────────────────
 
 @router.post("/crops/{crop_id}/supplies")
 def add_supply(crop_id: int, body: SupplyCreate):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_connection()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
+
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute(
             "INSERT INTO supplies (crop_id, name, quantity, unit, date) VALUES (%s, %s, %s, %s, %s)",
-            (crop_id, body.name, body.quantity, body.unit, body.date)
+            (crop_id, body.name, body.quantity, body.unit, body.create_date)
         )
-        conn.commit()
+
+        connect.commit()
         cursor.execute("SELECT * FROM supplies WHERE id = %s", (cursor.lastrowid,))
         return cursor.fetchone()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        close_connection(conn, cursor)
+        close_connection(connect, cursor)
 
 
 @router.delete("/crops/{crop_id}/supplies/{supply_id}")
 def delete_supply(crop_id: int, supply_id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    connect = get_connection()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
+
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute(
             "DELETE FROM supplies WHERE id = %s AND crop_id = %s",
             (supply_id, crop_id)
         )
-        conn.commit()
+
+        connect.commit()
         return {"message": "Đã xóa vật tư"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        close_connection(conn, cursor)
+        close_connection(connect, cursor)
 
 # ── Harvest Yield (Sản lượng) ────────────────────────────────────────────────
 
 @router.post("/crops/{crop_id}/yield")
 def add_yield(crop_id: int, body: YieldCreate):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_connection()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
+
     try:
+        cursor = connect.cursor(dictionary=True)
+
         cursor.execute("""
             INSERT INTO harvest_yields (crop_id, quantity, unit, quality, notes)
             VALUES (%s, %s, %s, %s, %s)
@@ -241,9 +318,10 @@ def add_yield(crop_id: int, body: YieldCreate):
             "UPDATE crops SET status = 'harvested' WHERE crop_id = %s",
             (crop_id,)
         )
-        conn.commit()
+
+        connect.commit()
         return {"message": "Đã lưu sản lượng"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        close_connection(conn, cursor)
+        close_connection(connect, cursor)
