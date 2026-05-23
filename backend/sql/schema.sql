@@ -57,7 +57,6 @@ CREATE TABLE device_maintenance (
 CREATE TABLE crops (
     crop_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id VARCHAR(50) NOT NULL,
-    device_id VARCHAR(50) NOT NULL,
     crop_name VARCHAR(100) NOT NULL,
     variety VARCHAR(100),
     plant_date DATE,
@@ -66,9 +65,22 @@ CREATE TABLE crops (
     status ENUM('growing', 'harvested', 'failed') DEFAULT 'growing',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+-- =============================================
+-- 4b. CROP DEVICES (nhiều-nhiều)
+-- =============================================
+CREATE TABLE crop_devices (
+    crop_id     INT NOT NULL,
+    device_id   VARCHAR(50) NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (crop_id, device_id),
+    FOREIGN KEY (crop_id)   REFERENCES crops(crop_id)     ON DELETE CASCADE,
+    FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE RESTRICT
+);
+
 
 -- =============================================
 -- 5. SENSOR READINGS
@@ -217,6 +229,6 @@ CREATE TABLE harvest_yields (
 CREATE INDEX idx_sensor_device_time ON sensor_readings(device_id, timestamp);
 CREATE INDEX idx_sensor_crop ON sensor_readings(crop_id);
 CREATE INDEX idx_alert_device ON alerts(device_id, created_at);
-CREATE INDEX idx_crop_device ON crops(device_id);
 CREATE INDEX idx_ai_rec_prediction ON ai_recommendations(prediction_id);
-CREATE INDEX idx_alert_crop        ON alerts(crop_id);              -- thiếu từ v1
+CREATE INDEX idx_alert_crop        ON alerts(crop_id);       
+CREATE INDEX idx_crop_devices_device ON crop_devices(device_id);
