@@ -9,6 +9,7 @@ import UserProfile from './pages/UserProfile'
 import Monitoring from "./pages/Monitoring"
 import Devices from "./pages/Devices"
 import Automation from "./pages/Automation"
+import AIAnalysis from './pages/AIAnalysis'
 import './styles/theme.css'
 import './styles/components.css'
 import './styles/layout.css'
@@ -105,6 +106,17 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                <UserProfile></UserProfile>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/AIAnalysis"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+               <AIAnalysis />
               </MainLayout>
             </ProtectedRoute>
           }

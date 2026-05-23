@@ -2,6 +2,16 @@ from src import config
 from src.data_loader import load_and_save_data
 from src.preprocessor import clean_and_prepare_data
 from src.modeling import train_model
+import os
+import random
+import numpy as np
+
+def set_seed(seed=42):
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+
+set_seed(config.RANDOM_STATE if hasattr(config, 'RANDOM_STATE') else 42)
 
 def main():
     df = load_and_save_data(

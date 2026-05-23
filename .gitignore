@@ -4,3 +4,7 @@ build/
 dist/
 .vscode/
 *.log
+__pycache__/
+*.pyc
+ML/venv_tf/
+backup_ai/
