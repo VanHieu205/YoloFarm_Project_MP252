@@ -3,7 +3,6 @@ from core.database import get_connection, close_connection
 from mqtt_publisher import mqtt_publisher
 import uuid
 from datetime import datetime
-from fastapi import Body
 
 router = APIRouter()
 
@@ -98,66 +97,42 @@ def get_device_detail(device_id: str):
 # TURN ON DEVICE
 # =============================================
 @router.post("/control/turn_on")
-def turn_on_device(data: dict = Body(...)):
-    user_id = data.get("user_id")
-    device_id = data.get("device_id")
-
-    if not user_id or not device_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Thiếu user_id hoặc device_id"
-        )
-
+def turn_on_device(device_id: str = Body(..., embed=True)):
+    """
+    Bật thiết bị
+    
+    Body:
+    {
+        "device_id": "device_001"
+    }
+    """
     connect = get_connection()
+
+    # Nếu kết nối thất bại
     if not connect:
         raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
-
+    
+    # Khởi tạo cursor = None
     cursor = None
-
     try:
         cursor = connect.cursor(dictionary=True)
-
-        cursor.execute(
-            """
-            SELECT *
-            FROM devices
-            WHERE device_id = %s
-              AND user_id = %s
-            """,
-            (device_id, user_id)
-        )
-        device = cursor.fetchone()
-
+        cursor.execute("SELECT * FROM devices WHERE device_id = %s", (device_id,))
+        device = cursor.fetchone()    
         if not device:
-            raise HTTPException(
-                status_code=404,
-                detail="Không tìm thấy thiết bị của người dùng này"
-            )
-
-        cursor.execute(
-            """
-            UPDATE devices
-            SET is_on = TRUE,
-                last_updated = NOW()
-            WHERE device_id = %s
-              AND user_id = %s
-            """,
-            (device_id, user_id)
-        )
+            raise HTTPException(status_code=404, detail="Không tìm thấy thiết bị")
+        update_query = "UPDATE devices SET is_on = TRUE, last_updated = NOW() WHERE device_id = %s"
+        cursor.execute(update_query, (device_id,))
         connect.commit()
-
+    
         success = mqtt_publisher.turn_on_device(device_id)
-
+        
         return {
             "success": success,
             "message": "Bật thiết bị thành công" if success else "Lỗi gửi lệnh MQTT",
-            "user_id": user_id,
             "device_id": device_id,
             "is_on": True
         }
-
-    except HTTPException:
-        raise
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -168,70 +143,48 @@ def turn_on_device(data: dict = Body(...)):
 # TURN OFF DEVICE
 # =============================================
 @router.post("/control/turn_off")
-def turn_off_device(data: dict = Body(...)):
-    user_id = data.get("user_id")
-    device_id = data.get("device_id")
-
-    if not user_id or not device_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Thiếu user_id hoặc device_id"
-        )
-
+def turn_off_device(device_id: str = Body(..., embed=True)):
+    """
+    Tắt thiết bị
+    
+    Body:
+    {
+        "device_id": "device_001"
+    }
+    """
     connect = get_connection()
+
+    # Nếu kết nối thất bại
     if not connect:
         raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
-
+    
+    # Khởi tạo cursor = None
     cursor = None
-
+    
     try:
         cursor = connect.cursor(dictionary=True)
 
-        cursor.execute(
-            """
-            SELECT *
-            FROM devices
-            WHERE device_id = %s
-              AND user_id = %s
-            """,
-            (device_id, user_id)
-        )
+        cursor.execute("SELECT * FROM devices WHERE device_id = %s", (device_id,))
         device = cursor.fetchone()
-
+        
         if not device:
-            raise HTTPException(
-                status_code=404,
-                detail="Không tìm thấy thiết bị của người dùng này"
-            )
-
-        cursor.execute(
-            """
-            UPDATE devices
-            SET is_on = FALSE,
-                last_updated = NOW()
-            WHERE device_id = %s
-              AND user_id = %s
-            """,
-            (device_id, user_id)
-        )
+            raise HTTPException(status_code=404, detail="Không tìm thấy thiết bị")
+        update_query = "UPDATE devices SET is_on = FALSE, last_updated = NOW() WHERE device_id = %s"
+        cursor.execute(update_query, (device_id,))
         connect.commit()
-
         success = mqtt_publisher.turn_off_device(device_id)
-
         return {
             "success": success,
             "message": "Tắt thiết bị thành công" if success else "Lỗi gửi lệnh MQTT",
-            "user_id": user_id,
             "device_id": device_id,
             "is_on": False
         }
-
-    except HTTPException:
-        raise
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         close_connection(connect, cursor)
+
 
 ############################### DASH BOARD#######################################
 # =============================================
@@ -293,8 +246,8 @@ def get_device_group_status(user_id: str):
 # =============================================
 @router.post("/control/type/turn_on")
 def turn_on_device_type(
-    user_id: str = Body(...),
-    device_type: str = Body(...)
+    user_id: str = Body(..., embed=True),
+    device_type: str = Body(..., embed=True)
 ):
 
     connect = get_connection()
@@ -352,8 +305,8 @@ def turn_on_device_type(
 # =============================================
 @router.post("/control/type/turn_off")
 def turn_off_device_type(
-    user_id: str = Body(...),
-    device_type: str = Body(...)
+    user_id: str = Body(..., embed=True),
+    device_type: str = Body(..., embed=True)
 ):
 
     connect = get_connection()
