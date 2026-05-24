@@ -16,7 +16,7 @@ try:
     connection_pool = pooling.MySQLConnectionPool(
         pool_name = "yolopool",
         pool_size = 5, # Cho phép tối đa 5 kết nối đồng thời
-        **db_config
+        dictionary = db_config
     )
     
     print("Khởi tạo Connection Pool thành công!")

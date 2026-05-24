@@ -16,9 +16,17 @@ def get_all_automations(user_id: str):
     """
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối đến database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
+
         query = """
         SELECT
             tc.config_id,
@@ -117,10 +125,16 @@ def create_automation(
     """
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
-
+        cursor = connect.cursor(dictionary=True)
         config_id = str(uuid.uuid4())
 
         insert_config = """
@@ -193,9 +207,16 @@ def toggle_automation(
     """
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
 
         query = """
         SELECT is_active
@@ -250,9 +271,16 @@ def toggle_automation(
 def delete_automation(config_id: str):
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
 
         cursor.execute(
             "SELECT * FROM threshold_config WHERE config_id = %s",
@@ -294,9 +322,16 @@ def delete_automation(config_id: str):
 def get_automation_detail(config_id: str):
 
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
 
         query = """
         SELECT

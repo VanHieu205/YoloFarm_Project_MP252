@@ -21,9 +21,17 @@ class PredictRequest(BaseModel):
 @router.post("/predict")
 def get_prediction_and_advice(req: PredictRequest):
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu kết nối thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+                            
+    # Khởi tạo cursor = None
+    cursor = None
 
     try:
+        cursor = connect.cursor(dictionary=True)
+        
         query = """
             SELECT
                 ROUND(AVG(sr.temperature), 2) AS temperature,

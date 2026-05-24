@@ -33,9 +33,17 @@ def login(email: str = Body(...), password: str = Body(...)):
     }
     """
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor(dictionary=True)
+        
         # Kiểm tra email có tồn tại không
         query = "SELECT user_id, username, email, password_hash, role, full_name FROM users WHERE email = %s"
         cursor.execute(query, (email,))
@@ -96,9 +104,17 @@ def register(
     }
     """
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor(dictionary=True)
+
         # Kiểm tra username đã tồn tại chưa
         query = "SELECT user_id FROM users WHERE username = %s OR email = %s"
         cursor.execute(query, (username, email))
@@ -145,9 +161,17 @@ def register(
 def get_profile(user_id: str):
     """Lấy thông tin user"""
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor(dictionary=True)
+
         query = """
         SELECT user_id, username, email, full_name, phone, role, created_at, last_login
         FROM users WHERE user_id = %s
@@ -173,9 +197,17 @@ def get_profile(user_id: str):
 def update_profile(user_id: str, full_name: str = Body(...), phone: str = Body(...)):
     """Cập nhật thông tin user"""
     connect = get_connection()
-    cursor = connect.cursor()
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor()
+
         query = "UPDATE users SET full_name = %s, phone = %s WHERE user_id = %s"
         cursor.execute(query, (full_name, phone, user_id))
         connect.commit()
@@ -198,9 +230,17 @@ def update_profile(user_id: str, full_name: str = Body(...), phone: str = Body(.
 def get_all_users(limit: int = 100, offset: int = 0):
     """Lấy danh sách tất cả user (mặc định 100 bản ghi)"""
     connect = get_connection()
-    cursor = connect.cursor(dictionary=True)
+
+    # Nếu connect vào database thất bại
+    if not connect:
+        raise HTTPException(status_code=500, detail="Lỗi kết nối Database")
+    
+    # Khởi tạo cursor = None
+    cursor = None
     
     try:
+        cursor = connect.cursor(dictionary=True)
+        
         query = """
         SELECT user_id, username, email, full_name, role, created_at
         FROM users LIMIT %s OFFSET %s
