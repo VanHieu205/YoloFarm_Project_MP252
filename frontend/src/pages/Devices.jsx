@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, Lightbulb, Waves, Activity, MapPin, Settings, CheckCircle, Loader2, AlertTriangle } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronUp,
+  Lightbulb,
+  Waves,
+  Activity,
+  MapPin,
+  Settings,
+  CheckCircle,
+  Loader2,
+  AlertTriangle,
+  Fan,
+  Server
+} from 'lucide-react'
 import { FaLightbulb, FaDroplet, FaThermometer, FaWind, FaServer } from 'react-icons/fa6'
 import axiosClient from "../api/axiosClient"
 
@@ -10,15 +23,48 @@ const user = JSON.parse(localStorage.getItem("user"))
 const USER_ID = user?.user_id
 
 const TYPE_META = {
-  light:   { name: 'Đèn',      Icon: FaLightbulb,  color: '#f59e0b' },
-  pump:    { name: 'Máy bơm',  Icon: FaDroplet,    color: '#3b82f6' },
-  sensor:  { name: 'Cảm biến', Icon: FaThermometer,color: '#8b5cf6' },
-  fan:     { name: 'Quạt',     Icon: FaWind,       color: '#10b981' },
-  gateway: { name: 'Gateway',  Icon: FaServer,     color: '#f43f5e' },
-}
+  light: {
+    name: 'Đèn',
+    GroupIcon: Lightbulb,     // icon nhóm
+    DeviceIcon: FaLightbulb, // icon từng thiết bị
+    color: '#f59e0b'
+  },
 
+  pump: {
+    name: 'Máy bơm',
+    GroupIcon: Waves,
+    DeviceIcon: FaDroplet,
+    color: '#3b82f6'
+  },
+
+  sensor: {
+    name: 'Cảm biến',
+    GroupIcon: Activity,
+    DeviceIcon: FaThermometer,
+    color: '#8b5cf6'
+  },
+
+  fan: {
+    name: 'Quạt',
+    GroupIcon: Fan,
+    DeviceIcon: FaWind,
+    color: '#10b981'
+  },
+
+  gateway: {
+    name: 'Gateway',
+    GroupIcon: Server,
+    DeviceIcon: FaServer,
+    color: '#f43f5e'
+  },
+}
 const getTypeMeta = (type) =>
-  TYPE_META[type] || { name: type, Icon: Activity, color: '#6b7280' }
+  TYPE_META[type] || {
+    name: type,
+    GroupIcon: Activity,
+    DeviceIcon: Activity,
+    color: '#6b7280'
+  }
 
 const isActive = (device) => device.is_on === true || device.is_on === 1
 
@@ -130,7 +176,7 @@ const Devices = () => {
     const typeDevices = devices.filter(d => d.type === typeKey)
     if (typeDevices.length === 0) return null
 
-    const { name, Icon, color } = getTypeMeta(typeKey)
+    const { name, GroupIcon, DeviceIcon, color } = getTypeMeta(typeKey)
     const activeCount = typeDevices.filter(isActive).length
     const percentage  = Math.round((activeCount / typeDevices.length) * 100)
     const isExpanded  = expandedTypes.includes(typeKey)
@@ -160,7 +206,7 @@ const Devices = () => {
             e.currentTarget.style.borderColor = `${color}40`
           }}
         >
-          <Icon style={{ fontSize: '22px', color, minWidth: '22px' }} />
+          <GroupIcon style={{ fontSize: '22px', color, minWidth: '22px' }} />
 
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>{name}</div>
@@ -249,7 +295,7 @@ const Devices = () => {
                     e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,.04)'
                   }}
                 >
-                  <Icon style={{ fontSize: '17px', color, minWidth: '17px' }} />
+                  <DeviceIcon style={{ fontSize: '17px', color, minWidth: '17px' }} />
 
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>

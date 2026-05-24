@@ -1,8 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Loader } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 import '../styles/components.css';
+import {
+  Send,
+  Mic,
+  Loader,
+  Bot,
+  MessageCircle,
+  BookOpen,
+  AlertCircle
+} from 'lucide-react'
 
+import logo from '../../logo.jpg'
 const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -77,7 +86,8 @@ const ChatPage = () => {
       console.error('Lỗi:', error);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: '❌ Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại.',
+        content: 'Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại.',
+        isError: true,
         timestamp: new Date().toISOString()
       }]);
     } finally {
@@ -136,7 +146,8 @@ const ChatPage = () => {
     setIsLoading(true);
     setMessages(prev => [...prev, {
       role: 'user',
-      content: '🎤 [Đang xử lý âm thanh...]',
+      content: '[Đang xử lý âm thanh...]',
+      isVoice: true,
       timestamp: new Date().toISOString()
     }]);
 
@@ -157,7 +168,8 @@ const ChatPage = () => {
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: 'user',
-            content: `🎤 ${response.data.response || '[Không thể nhận dạng]'}`,
+            content: response.data.response || '[Không thể nhận dạng]',
+            isVoice: true,  
             timestamp: new Date().toISOString()
           };
           return updated;
@@ -199,7 +211,13 @@ const ChatPage = () => {
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <h1 style={styles.title}>🌾 Chatbot Nông Nghiệp Thông Minh</h1>
+        <div style={styles.titleWrapper}>
+        <img src={logo} alt="Logo" style={styles.logo} />
+
+        <h1 style={styles.title}>
+          Chatbot Nông Nghiệp Thông Minh
+        </h1>
+      </div>
         <p style={styles.subtitle}>Hỏi về bệnh cây, cách chăm sóc và giải pháp nông nghiệp</p>
       </div>
 
@@ -207,7 +225,9 @@ const ChatPage = () => {
       <div style={styles.messagesContainer}>
         {messages.length === 0 ? (
           <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>💬</div>
+            <div style={styles.emptyIcon}>
+              <MessageCircle size={52} />
+            </div>
             <p style={styles.emptyText}>Chào bạn! Tôi là chatbot nông nghiệp thông minh.</p>
             <p style={styles.emptyText}>Hãy hỏi tôi về bệnh cây, cách điều trị, hoặc bất kỳ vấn đề nông nghiệp nào!</p>
           </div>
@@ -215,12 +235,24 @@ const ChatPage = () => {
           messages.map((msg, idx) => (
             <div key={idx} style={{ ...styles.messageGroup, justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
               <div style={{ ...styles.messageBubble, ...( msg.role === 'user' ? styles.userMessage : styles.botMessage) }}>
-                <p style={styles.messageContent}>{msg.content}</p>
-                
+                <div style={styles.messageTextWrapper}>
+                  {msg.isVoice && (
+                    <Mic size={16} style={{ minWidth: '16px' }} />
+                  )}
+                  {msg.isError && (
+                    <AlertCircle size={16} style={{ minWidth: '16px' }} />
+                  )}
+
+                  <p style={styles.messageContent}>{msg.content}</p>
+                </div>
+                                
                 {/* Hiển thị context nếu có */}
                 {msg.context && msg.context.length > 0 && (
                   <div style={styles.contextBox}>
-                    <strong style={styles.contextTitle}>📚 Tham khảo:</strong>
+                    <div style={styles.contextTitle}>
+                      <BookOpen size={14} />
+                      <strong>Tham khảo</strong>
+                    </div>
                     {msg.context.map((ctx, i) => (
                       <div key={i} style={styles.contextItem}>
                         <span>• {ctx.disease} ({ctx.crop})</span>
@@ -344,8 +376,8 @@ const styles = {
     color: '#999'
   },
   emptyIcon: {
-    fontSize: '48px',
-    marginBottom: '15px'
+    marginBottom: '15px',
+    color: '#2ecc71'
   },
   emptyText: {
     margin: '8px 0',
@@ -362,6 +394,11 @@ const styles = {
     wordWrap: 'break-word',
     boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
   },
+  messageTextWrapper: {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '8px'
+},
   userMessage: {
     backgroundColor: '#2ecc71',
     color: 'white',
@@ -387,7 +424,9 @@ const styles = {
     fontSize: '12px'
   },
   contextTitle: {
-    display: 'block',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
     marginBottom: '6px',
     color: '#2ecc71'
   },
@@ -492,7 +531,22 @@ const styles = {
       backgroundColor: '#bbb',
       cursor: 'not-allowed'
     }
-  }
+  },
+  titleWrapper: {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '12px',
+  marginBottom: '6px'
+},
+
+logo: {
+  width: '42px',
+  height: '42px',
+  borderRadius: '50%',
+  objectFit: 'cover',
+  border: '2px solid rgba(255,255,255,0.4)'
+},
 };
 
 export default ChatPage;

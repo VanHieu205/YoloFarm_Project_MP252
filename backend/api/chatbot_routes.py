@@ -398,6 +398,7 @@ def convert_audio_to_wav(audio_path: str, output_format: str = "wav") -> str:
         logger.info("🔹 Cách 2: Thử FFmpeg subprocess...")
         
         ffmpeg_paths = [
+            os.getenv("path_to_ffmpeg"), 
             # WinGet installation path
             r"C:\Users\ACER\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin\ffmpeg.exe",
             # Common paths
