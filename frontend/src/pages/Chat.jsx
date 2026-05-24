@@ -126,7 +126,7 @@ const ChatPage = () => {
       streamRef.current.getTracks().forEach(track => track.stop());
 
       // Tạo blob từ audio chunks
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
       await sendAudioMessage(audioBlob);
     };
   };
@@ -143,7 +143,7 @@ const ChatPage = () => {
     try {
       const formData = new FormData();
       formData.append('user_id', userId);
-      formData.append('audio_file', audioBlob, 'audio.wav');
+      formData.append('audio_file', audioBlob, 'audio.webm');
 
       const response = await axiosClient.post('api/chatbot/chat/voice', formData, {
         headers: {
