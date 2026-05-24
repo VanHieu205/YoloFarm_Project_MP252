@@ -8,3 +8,4 @@ __pycache__/
 *.pyc
 ML/venv_tf/
 backup_ai/
+venv/
