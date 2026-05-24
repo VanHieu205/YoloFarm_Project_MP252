@@ -33,19 +33,19 @@ def get_prediction_and_advice(req: PredictRequest):
         cursor = connect.cursor(dictionary=True)
         
         query = """
-            SELECT sr.temperature, sr.humidity, sr.soil_moisture, sr.timestamp
+            SELECT
+                ROUND(AVG(sr.temperature), 2) AS temperature,
+                ROUND(AVG(sr.humidity), 2) AS humidity,
+                ROUND(AVG(sr.soil_moisture), 2) AS soil_moisture,
+                MAX(sr.timestamp) AS timestamp
             FROM sensor_readings sr
             JOIN devices d ON sr.device_id = d.device_id
             WHERE d.user_id = %s
-              AND sr.temperature IS NOT NULL 
-              AND sr.humidity IS NOT NULL 
-              AND sr.soil_moisture IS NOT NULL
-            ORDER BY sr.timestamp DESC 
-            LIMIT 1
+            AND sr.timestamp >= NOW() - INTERVAL 1 MINUTE
         """
         cursor.execute(query, (req.user_id,))
         latest_sensor = cursor.fetchone()
-
+        print("LATEST SENSOR =", latest_sensor)
         if not latest_sensor:
             raise HTTPException(
                 status_code=404,

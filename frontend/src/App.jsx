@@ -10,6 +10,7 @@ import Monitoring from "./pages/Monitoring"
 import Devices from "./pages/Devices"
 import Automation from "./pages/Automation"
 import AIAnalysis from './pages/AIAnalysis'
+import Chat from './pages/Chat'
 import './styles/theme.css'
 import './styles/components.css'
 import './styles/layout.css'
@@ -117,6 +118,17 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                <AIAnalysis />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Chat />
               </MainLayout>
             </ProtectedRoute>
           }

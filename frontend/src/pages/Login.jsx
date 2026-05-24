@@ -41,8 +41,7 @@ const Login = () => {
 
     setLoading(true)
     try {
-      // Lưu ý: Đường dẫn phải khớp với FastAPI (@router.post("/login"))
-      // Nếu prefix router là /users thì là '/users/login'
+      
       const response = await axiosClient.post('api/users/login', {
         email: email,
         password: password
