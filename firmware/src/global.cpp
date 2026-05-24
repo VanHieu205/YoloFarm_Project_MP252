@@ -10,6 +10,7 @@ float glob_light = 0;
 float glob_soil_moisture = 0.0f;
 
 bool glob_lamp_state = false;
+bool glob_fan_state = false;
 bool glob_pump_state = false;
 
 unsigned long bootMillis = 0;

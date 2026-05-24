@@ -1,10 +1,11 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-    baseURL: 'http://localhost:8000', // Port của Backend
+    baseURL: "https://avenge-task-common.ngrok-free.dev", // Port của Backend
     headers: {
         'Content-Type': 'application/json',
-    },
+        "ngrok-skip-browser-warning": "true",
+    }
 });
 
 // Interceptor để gắn Token vào mỗi request nếu có

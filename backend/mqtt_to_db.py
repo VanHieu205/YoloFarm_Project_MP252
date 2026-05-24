@@ -29,10 +29,6 @@ def on_message(client, userdata, msg):
         # Kiểm tra dữ liệu không null
         required_fields = ["temperature", "humidity", "soil_moisture"]
 
-        if any(payload.get(field) is None for field in required_fields):
-            print(f"Bỏ qua bản ghi lỗi (chứa null): {payload}")
-            return
-
         # 2. Mở kết nối tới MySQL thông qua Connection Pool
         connect = get_connection()
         cursor = connect.cursor()

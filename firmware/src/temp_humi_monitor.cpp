@@ -17,7 +17,9 @@ void temp_humi_monitor(void *pvParameters)
     pinMode(LIGHT_RELAY_PIN, OUTPUT);
     digitalWrite(LIGHT_RELAY_PIN, LOW);
 
-    const TickType_t xFrequency = pdMS_TO_TICKS(5000);
+    pinMode(FAN_CONTROL_PIN, OUTPUT);
+    digitalWrite(FAN_CONTROL_PIN, LOW);
+    const TickType_t xFrequency = pdMS_TO_TICKS(200);
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
     while (1)
@@ -59,6 +61,7 @@ void temp_humi_monitor(void *pvParameters)
                 glob_lamp_state = false;
                 digitalWrite(LIGHT_RELAY_PIN, LOW);
             }
+            
         }
         else
         {
@@ -74,16 +77,16 @@ void temp_humi_monitor(void *pvParameters)
         String sensorPayload;
         serializeJson(sensorDoc, sensorPayload);
 
-        JsonDocument deviceDoc;
-        deviceDoc["device_id"] = "LAMP-001";
-        deviceDoc["name"] = "den chieu sang khu a";
-        deviceDoc["type"] = "light";
-        deviceDoc["connection_status"] = "online";
-        deviceDoc["connection_type"] = "gpio_relay";
-        deviceDoc["is_on"] = glob_lamp_state;
-        deviceDoc["mode"] = currentmode;
-        String devicePayload;
-        serializeJson(deviceDoc, devicePayload);
+        // JsonDocument deviceDoc;
+        // deviceDoc["device_id"] = "LAMP-001";
+        // deviceDoc["name"] = "den chieu sang khu a";
+        // deviceDoc["type"] = "light";
+        // deviceDoc["connection_status"] = "online";
+        // deviceDoc["connection_type"] = "gpio_relay";
+        // deviceDoc["is_on"] = glob_lamp_state;
+        // deviceDoc["mode"] = currentmode;
+        // String devicePayload;
+        // serializeJson(deviceDoc, devicePayload);
 
         if (xJsonQueue != NULL && xJsonQueueMutex != NULL)
         {
@@ -96,12 +99,12 @@ void temp_humi_monitor(void *pvParameters)
                 msg1.payload[sizeof(msg1.payload) - 1] = '\0';
                 xQueueSend(xJsonQueue, &msg1, pdMS_TO_TICKS(100));
 
-                JsonMessage msg2;
-                strncpy(msg2.topic, "yolofarm/devices/status", sizeof(msg2.topic) - 1);
-                msg2.topic[sizeof(msg2.topic) - 1] = '\0';
-                strncpy(msg2.payload, devicePayload.c_str(), sizeof(msg2.payload) - 1);
-                msg2.payload[sizeof(msg2.payload) - 1] = '\0';
-                xQueueSend(xJsonQueue, &msg2, pdMS_TO_TICKS(100));
+                // JsonMessage msg2;
+                // strncpy(msg2.topic, "yolofarm/devices/status", sizeof(msg2.topic) - 1);
+                // msg2.topic[sizeof(msg2.topic) - 1] = '\0';
+                // strncpy(msg2.payload, devicePayload.c_str(), sizeof(msg2.payload) - 1);
+                // msg2.payload[sizeof(msg2.payload) - 1] = '\0';
+                // xQueueSend(xJsonQueue, &msg2, pdMS_TO_TICKS(100));
 
                 xSemaphoreGive(xJsonQueueMutex);
             }

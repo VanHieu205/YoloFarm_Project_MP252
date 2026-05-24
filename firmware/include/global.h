@@ -28,6 +28,7 @@ extern float glob_light;
 extern float glob_soil_moisture;
 
 extern bool glob_lamp_state;
+extern bool glob_fan_state;
 extern bool glob_pump_state;
 
 extern unsigned long bootMillis;

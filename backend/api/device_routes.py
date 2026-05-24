@@ -246,8 +246,8 @@ def get_device_group_status(user_id: str):
 # =============================================
 @router.post("/control/type/turn_on")
 def turn_on_device_type(
-    user_id: str = Body(...),
-    device_type: str = Body(...)
+    user_id: str = Body(..., embed=True),
+    device_type: str = Body(..., embed=True)
 ):
 
     connect = get_connection()
@@ -305,8 +305,8 @@ def turn_on_device_type(
 # =============================================
 @router.post("/control/type/turn_off")
 def turn_off_device_type(
-    user_id: str = Body(...),
-    device_type: str = Body(...)
+    user_id: str = Body(..., embed=True),
+    device_type: str = Body(..., embed=True)
 ):
 
     connect = get_connection()

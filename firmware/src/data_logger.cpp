@@ -60,7 +60,7 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
         String target_device = doc["device_id"].as<String>();
         String command = doc["command"].as<String>();
         String value = doc["value"].as<String>();
-
+        
         if (target_device == "PUMP-001")
         {
             if (command == "turn_on" && value == "on")
@@ -86,6 +86,20 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
             {
                 glob_lamp_state = false;
                 digitalWrite(LIGHT_RELAY_PIN, LOW);
+            }
+            last_server_cmd_time = millis();
+        }
+        if (target_device == "FAN-001")
+        {
+            if (command == "turn_on" && value == "on")
+            {
+                glob_fan_state = true;
+                digitalWrite(FAN_CONTROL_PIN, HIGH);
+            }
+            else if (command == "turn_off" && value == "off")
+            {
+                glob_fan_state = false;
+                digitalWrite(FAN_CONTROL_PIN, LOW);
             }
             last_server_cmd_time = millis();
         }

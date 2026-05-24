@@ -115,7 +115,10 @@ const Devices = () => {
     setTogglingIds(prev => new Set(prev).add(deviceId))
 
     try {
-      const res = await axiosClient.post(endpoint, { device_id: deviceId })
+      const res = await axiosClient.post(endpoint, {
+        user_id: USER_ID,
+        device_id: deviceId
+      })
       setDevices(prev =>
         prev.map(d => d.device_id === deviceId ? { ...d, is_on: res.data.is_on } : d)
       )
