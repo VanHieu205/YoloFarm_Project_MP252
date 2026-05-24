@@ -97,7 +97,7 @@ def get_device_detail(device_id: str):
 # TURN ON DEVICE
 # =============================================
 @router.post("/control/turn_on")
-def turn_on_device(device_id: str = Body(...)):
+def turn_on_device(device_id: str = Body(..., embed=True)):
     """
     Bật thiết bị
     
@@ -114,13 +114,10 @@ def turn_on_device(device_id: str = Body(...)):
     
     # Khởi tạo cursor = None
     cursor = None
-    
     try:
         cursor = connect.cursor(dictionary=True)
-
         cursor.execute("SELECT * FROM devices WHERE device_id = %s", (device_id,))
-        device = cursor.fetchone()
-        
+        device = cursor.fetchone()    
         if not device:
             raise HTTPException(status_code=404, detail="Không tìm thấy thiết bị")
         update_query = "UPDATE devices SET is_on = TRUE, last_updated = NOW() WHERE device_id = %s"
@@ -146,7 +143,7 @@ def turn_on_device(device_id: str = Body(...)):
 # TURN OFF DEVICE
 # =============================================
 @router.post("/control/turn_off")
-def turn_off_device(device_id: str = Body(...)):
+def turn_off_device(device_id: str = Body(..., embed=True)):
     """
     Tắt thiết bị
     
