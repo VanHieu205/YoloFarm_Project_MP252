@@ -15,7 +15,9 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 Đối với chatbox mọi người tải thêm các thư viện cần thiết nha tại mình có sẵn hết nên không biết mọi người sẽ thiếu gì.
 Tải cả thư viện speech to text nha mn.
 tải pydup 
+pip install pydub
 tải ffmpeg
+winget install Gyan.FFmpeg
 Ở env thêm api của gemini
 thêm địa chỉ cứng vào env bằng lệnh (Get-Command ffmpeg).Source
 path_to_ffmpeg=địa chỉ của bn
