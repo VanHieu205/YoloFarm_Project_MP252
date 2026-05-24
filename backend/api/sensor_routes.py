@@ -20,7 +20,7 @@ def get_latest_data():
 
             FROM sensor_readings
 
-            WHERE timestamp >= NOW() - INTERVAL 1 SECOND
+            WHERE timestamp >= NOW() - INTERVAL 2 SECOND
         """
 
         cursor.execute(query)
@@ -58,23 +58,22 @@ def get_sensor_history(limit: int = Query(20, ge=1, le=100)):
 
             FROM (
                 SELECT
-                    FROM_UNIXTIME(
-                        FLOOR(UNIX_TIMESTAMP(`timestamp`))
-                    ) AS time_group,
+                    FLOOR(UNIX_TIMESTAMP(`timestamp`)) AS sec_group,
+                    FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(`timestamp`))) AS time_group,
 
                     temperature,
                     humidity,
                     soil_moisture,
                     light_intensity,
                     co2
-
                 FROM sensor_readings
+                WHERE `timestamp` >= NOW() - INTERVAL %s SECOND
             ) AS grouped_data
 
-            GROUP BY time_group
-            ORDER BY time_group DESC
-            LIMIT %s
+            GROUP BY sec_group, time_group
+            ORDER BY sec_group DESC
         """
+
 
         cursor.execute(query, (limit,))
         return cursor.fetchall()

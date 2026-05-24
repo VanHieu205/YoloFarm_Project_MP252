@@ -1,11 +1,30 @@
-SELECT 
-    c.crop_name,
-    s.temperature,
-    s.soil_moisture,
-    a.action,
-    a.reason
-FROM sensor_readings s
-JOIN crops c ON s.crop_id = c.crop_id
-JOIN ai_recommendations r ON r.crop_id = c.crop_id
-JOIN ai_actions a ON a.recommendation_id = r.recommendation_id
-ORDER BY s.timestamp DESC;
+USE yolofarm;
+INSERT INTO sensor_readings VALUES
+
+-- ===== 60s =====
+('READ-009','SENSOR-001',1,NOW() - INTERVAL 60 SECOND,30.1,61,NULL,NULL,NULL,'Vườn mẫu'),
+('READ-010','SENSOR-002',1,NOW() - INTERVAL 60 SECOND,NULL,NULL,55,520,NULL,'Vườn mẫu'),
+
+-- ===== 50s =====
+('READ-011','SENSOR-001',1,NOW() - INTERVAL 50 SECOND,30.3,62,NULL,NULL,NULL,'Vườn mẫu'),
+('READ-012','SENSOR-002',1,NOW() - INTERVAL 50 SECOND,NULL,NULL,56,525,NULL,'Vườn mẫu'),
+
+-- ===== 40s =====
+('READ-013','SENSOR-001',1,NOW() - INTERVAL 40 SECOND,30.5,63,NULL,NULL,NULL,'Vườn mẫu'),
+('READ-014','SENSOR-002',1,NOW() - INTERVAL 40 SECOND,NULL,NULL,57,530,NULL,'Vườn mẫu'),
+
+-- ===== 30s =====
+('READ-015','SENSOR-001',1,NOW() - INTERVAL 30 SECOND,30.7,64,NULL,NULL,NULL,'Vườn mẫu'),
+('READ-016','SENSOR-002',1,NOW() - INTERVAL 30 SECOND,NULL,NULL,58,535,NULL,'Vườn mẫu'),
+
+-- ===== 20s =====
+('READ-017','SENSOR-001',1,NOW() - INTERVAL 20 SECOND,30.9,65,NULL,NULL,NULL,'Vườn mẫu'),
+('READ-018','SENSOR-002',1,NOW() - INTERVAL 20 SECOND,NULL,NULL,59,540,NULL,'Vườn mẫu'),
+
+-- ===== 10s =====
+('READ-019','SENSOR-001',1,NOW() - INTERVAL 10 SECOND,31.1,66,NULL,NULL,NULL,'Vườn mẫu'),
+('READ-020','SENSOR-002',1,NOW() - INTERVAL 10 SECOND,NULL,NULL,60,545,NULL,'Vườn mẫu'),
+
+-- ===== hiện tại =====
+('READ-021','SENSOR-001',1,NOW(),31.3,67,NULL,NULL,NULL,'Vườn mẫu'),
+('READ-022','SENSOR-002',1,NOW(),NULL,NULL,61,550,NULL,'Vườn mẫu');

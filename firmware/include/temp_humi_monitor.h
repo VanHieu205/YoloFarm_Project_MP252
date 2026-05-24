@@ -7,4 +7,5 @@
 
 void temp_humi_monitor(void *pvParameters);
 #define LIGHT_RELAY_PIN 48
+#define FAN_CONTROL_PIN 18
 #endif

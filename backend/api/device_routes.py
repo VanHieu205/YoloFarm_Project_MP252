@@ -107,7 +107,6 @@ def turn_on_device(device_id: str = Body(...)):
     }
     """
     connect = get_connection()
-
     # Nếu kết nối thất bại
     if not connect:
         raise HTTPException(status_code=500, detail="Lỗi kết nối Database")

@@ -13,38 +13,76 @@ const SensorChart = () => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const fetchData = async () => {
+
+    // load history ban đầu
+    const fetchInitial = async () => {
       try {
-        setLoading(true)
-        // Lấy 48 bản ghi (2 giờ/bản ghi ≈ 24h)
         const res = await axiosClient.get("/api/sensors/history?limit=48")
 
-        // Map field từ DB sang tên dùng trong chart
-        const mapped = res.data
-          .reverse() // API trả về DESC → đảo lại thành ASC
-          .map((r) => ({
-            time: new Date(r.timestamp).toLocaleTimeString("vi-VN", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            temp:     r.temperature,
-            humidity: r.humidity,
-            light:    r.light_intensity,
-            // Thêm nếu cần dùng sau:
-            // soil:  r.soil_moisture,
-            // co2:   r.co2,
-          }))
+        const mapped = res.data.reverse().map((r) => ({
+          time: new Date(r.timestamp).toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }),
+          temp: r.temperature,
+          humidity: r.humidity,
+          light: r.light_intensity,
+          soil: r.soil_moisture,
+          co2: r.co2,
+        }))
 
         setSensorData(mapped)
+
       } catch (err) {
-        setError("Không thể tải dữ liệu cảm biến.")
         console.error(err)
+        setError("Không thể tải dữ liệu cảm biến.")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchData()
+    // realtime append
+    const fetchLatest = async () => {
+      try {
+        const res = await axiosClient.get("/api/sensors/latest")
+
+        const r = res.data
+
+        const newPoint = {
+          time: new Date(r.timestamp).toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }),
+          temp: r.temperature,
+          humidity: r.humidity,
+          light: r.light_intensity,
+          soil: r.soil_moisture,
+          co2: r.co2,
+        }
+
+        setSensorData((prev) => {
+          // tránh duplicate timestamp
+          if (prev.length > 0 &&
+              prev[prev.length - 1].time === newPoint.time) {
+            return prev
+          }
+
+          return [...prev, newPoint].slice(-48)
+        })
+
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    fetchInitial()
+
+    const interval = setInterval(fetchLatest, 500)
+
+    return () => clearInterval(interval)
+
   }, [])
 
   // ── Lấy bản ghi mới nhất để hiển thị current stats ──────────────────
@@ -70,7 +108,7 @@ const SensorChart = () => {
     {
       label: "Ánh sáng",
       value: latest.light != null ? String(latest.light) : "—",
-      unit: "Lux",
+      unit: "Analog",
       icon: Sun,
       color: "#f59e0b",
       bgColor: "rgba(245, 158, 11, 0.1)",
@@ -128,45 +166,105 @@ const SensorChart = () => {
       <div style={{ marginTop: "var(--spacing-lg)" }}>
         <h3 style={{ marginBottom: "var(--spacing-md)", marginTop: 0 }}>📈 Biểu đồ 24 giờ</h3>
 
-        {/* Temperature Chart */}
-        <div style={{ marginBottom: "var(--spacing-lg)" }}>
-          <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>Nhiệt độ (°C)</div>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={sensorData}>
-              <defs>
-                <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#ef4444" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-200)" />
-              <XAxis dataKey="time" stroke="var(--text-secondary)" />
-              <YAxis stroke="var(--text-secondary)" />
-              <Tooltip contentStyle={{ background: "var(--white)", border: "1px solid var(--gray-200)", borderRadius: "var(--radius-md)" }} />
-              <Area type="monotone" dataKey="temp" stroke="#ef4444" fillOpacity={1} fill="url(#colorTemp)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartBlock title="Nhiệt độ (°C)">
+          <AreaChart data={sensorData}>
+            <defs>
+              <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-200)" />
+            <XAxis dataKey="time" stroke="var(--text-secondary)" />
+            <YAxis stroke="var(--text-secondary)" />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Area type="monotone" dataKey="temp" stroke="#ef4444" fillOpacity={1} fill="url(#colorTemp)" name="Nhiệt độ (°C)" />
+          </AreaChart>
+        </ChartBlock>
 
-        {/* Humidity & Light Chart */}
-        <div>
-          <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>Độ ẩm & Ánh sáng</div>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={sensorData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-200)" />
-              <XAxis dataKey="time" stroke="var(--text-secondary)" />
-              <YAxis yAxisId="left"  stroke="var(--text-secondary)" />
-              <YAxis yAxisId="right" orientation="right" stroke="var(--text-secondary)" />
-              <Tooltip contentStyle={{ background: "var(--white)", border: "1px solid var(--gray-200)", borderRadius: "var(--radius-md)" }} />
-              <Legend />
-              <Line yAxisId="left"  type="monotone" dataKey="humidity" stroke="#3b82f6" name="Độ ẩm (%)"       dot={{ r: 4 }} />
-              <Line yAxisId="right" type="monotone" dataKey="light"    stroke="#f59e0b" name="Ánh sáng (Lux)" dot={{ r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartBlock title="Độ ẩm không khí (%)">
+          <AreaChart data={sensorData}>
+            <defs>
+              <linearGradient id="colorHumidity" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-200)" />
+            <XAxis dataKey="time" stroke="var(--text-secondary)" />
+            <YAxis stroke="var(--text-secondary)" />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Area type="monotone" dataKey="humidity" stroke="#3b82f6" fillOpacity={1} fill="url(#colorHumidity)" name="Độ ẩm (%)" />
+          </AreaChart>
+        </ChartBlock>
+
+        <ChartBlock title="Ánh sáng (Analog)">
+          <AreaChart data={sensorData}>
+            <defs>
+              <linearGradient id="colorLight" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-200)" />
+            <XAxis dataKey="time" stroke="var(--text-secondary)" />
+            <YAxis stroke="var(--text-secondary)" />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Area type="monotone" dataKey="light" stroke="#f59e0b" fillOpacity={1} fill="url(#colorLight)" name="Ánh sáng (Analog)" />
+          </AreaChart>
+        </ChartBlock>
+
+        <ChartBlock title="Độ ẩm đất (%)">
+          <AreaChart data={sensorData}>
+            <defs>
+              <linearGradient id="colorSoil" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-200)" />
+            <XAxis dataKey="time" stroke="var(--text-secondary)" />
+            <YAxis domain={[0, 100]} stroke="var(--text-secondary)" />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Area type="monotone" dataKey="soil" stroke="#22c55e" fillOpacity={1} fill="url(#colorSoil)" name="Độ ẩm đất (%)" />
+          </AreaChart>
+        </ChartBlock>
+
+        <ChartBlock title="CO₂ (ppm)" last>
+          <AreaChart data={sensorData}>
+            <defs>
+              <linearGradient id="colorCo2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-200)" />
+            <XAxis dataKey="time" stroke="var(--text-secondary)" />
+            <YAxis stroke="var(--text-secondary)" />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Area type="monotone" dataKey="co2" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorCo2)" name="CO₂ (ppm)" />
+          </AreaChart>
+        </ChartBlock>
       </div>
     </div>
   )
 }
+
+const tooltipStyle = {
+  background: "var(--white)",
+  border: "1px solid var(--gray-200)",
+  borderRadius: "var(--radius-md)",
+}
+
+const ChartBlock = ({ title, children, last = false }) => (
+  <div style={{ marginBottom: last ? 0 : "var(--spacing-lg)" }}>
+    <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+      {title}
+    </div>
+    <ResponsiveContainer width="100%" height={250}>
+      {children}
+    </ResponsiveContainer>
+  </div>
+)
 
 export default SensorChart

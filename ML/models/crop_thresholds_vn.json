@@ -1,0 +1,167 @@
+[
+    {
+        "name_crop": "rice",
+        "Upper_temperature_threshold": 38.0,
+        "Lower_temperature_threshold": 18.0,
+        "Upper_humidity_threshold": 95.0,
+        "Lower_humidity_threshold": 70.0,
+        "Upper_light_threshold": 80000.0,
+        "Lower_light_threshold": 30000.0,
+        "Upper_moisture_threshold": 100.0,
+        "Lower_moisture_threshold": 75.0
+    },
+    {
+        "name_crop": "maize",
+        "Upper_temperature_threshold": 35.0,
+        "Lower_temperature_threshold": 18.0,
+        "Upper_humidity_threshold": 85.0,
+        "Lower_humidity_threshold": 60.0,
+        "Upper_light_threshold": 75000.0,
+        "Lower_light_threshold": 30000.0,
+        "Upper_moisture_threshold": 80.0,
+        "Lower_moisture_threshold": 60.0
+    },
+    {
+        "name_crop": "sugarcane",
+        "Upper_temperature_threshold": 38.0,
+        "Lower_temperature_threshold": 20.0,
+        "Upper_humidity_threshold": 85.0,
+        "Lower_humidity_threshold": 65.0,
+        "Upper_light_threshold": 85000.0,
+        "Lower_light_threshold": 40000.0,
+        "Upper_moisture_threshold": 85.0,
+        "Lower_moisture_threshold": 60.0
+    },
+    {
+        "name_crop": "coffee",
+        "Upper_temperature_threshold": 32.0,
+        "Lower_temperature_threshold": 18.0,
+        "Upper_humidity_threshold": 85.0,
+        "Lower_humidity_threshold": 65.0,
+        "Upper_light_threshold": 50000.0,
+        "Lower_light_threshold": 20000.0,
+        "Upper_moisture_threshold": 80.0,
+        "Lower_moisture_threshold": 55.0
+    },
+    {
+        "name_crop": "tomato",
+        "Upper_temperature_threshold": 32.0,
+        "Lower_temperature_threshold": 15.0,
+        "Upper_humidity_threshold": 80.0,
+        "Lower_humidity_threshold": 60.0,
+        "Upper_light_threshold": 60000.0,
+        "Lower_light_threshold": 25000.0,
+        "Upper_moisture_threshold": 75.0,
+        "Lower_moisture_threshold": 60.0
+    },
+    {
+        "name_crop": "potato",
+        "Upper_temperature_threshold": 28.0,
+        "Lower_temperature_threshold": 15.0,
+        "Upper_humidity_threshold": 85.0,
+        "Lower_humidity_threshold": 65.0,
+        "Upper_light_threshold": 45000.0,
+        "Lower_light_threshold": 20000.0,
+        "Upper_moisture_threshold": 75.0,
+        "Lower_moisture_threshold": 60.0
+    },
+    {
+        "name_crop": "dragon_fruit",
+        "Upper_temperature_threshold": 38.0,
+        "Lower_temperature_threshold": 20.0,
+        "Upper_humidity_threshold": 80.0,
+        "Lower_humidity_threshold": 55.0,
+        "Upper_light_threshold": 90000.0,
+        "Lower_light_threshold": 40000.0,
+        "Upper_moisture_threshold": 70.0,
+        "Lower_moisture_threshold": 45.0
+    },
+    {
+        "name_crop": "banana",
+        "Upper_temperature_threshold": 35.0,
+        "Lower_temperature_threshold": 20.0,
+        "Upper_humidity_threshold": 90.0,
+        "Lower_humidity_threshold": 65.0,
+        "Upper_light_threshold": 65000.0,
+        "Lower_light_threshold": 25000.0,
+        "Upper_moisture_threshold": 85.0,
+        "Lower_moisture_threshold": 65.0
+    },
+    {
+        "name_crop": "mango",
+        "Upper_temperature_threshold": 38.0,
+        "Lower_temperature_threshold": 20.0,
+        "Upper_humidity_threshold": 80.0,
+        "Lower_humidity_threshold": 55.0,
+        "Upper_light_threshold": 80000.0,
+        "Lower_light_threshold": 35000.0,
+        "Upper_moisture_threshold": 75.0,
+        "Lower_moisture_threshold": 50.0
+    },
+    {
+        "name_crop": "onion",
+        "Upper_temperature_threshold": 30.0,
+        "Lower_temperature_threshold": 15.0,
+        "Upper_humidity_threshold": 75.0,
+        "Lower_humidity_threshold": 55.0,
+        "Upper_light_threshold": 55000.0,
+        "Lower_light_threshold": 20000.0,
+        "Upper_moisture_threshold": 75.0,
+        "Lower_moisture_threshold": 60.0
+    },
+    {
+        "name_crop": "garlic",
+        "Upper_temperature_threshold": 32.0,
+        "Lower_temperature_threshold": 15.0,
+        "Upper_humidity_threshold": 75.0,
+        "Lower_humidity_threshold": 55.0,
+        "Upper_light_threshold": 60000.0,
+        "Lower_light_threshold": 25000.0,
+        "Upper_moisture_threshold": 70.0,
+        "Lower_moisture_threshold": 55.0
+    },
+    {
+        "name_crop": "tea",
+        "Upper_temperature_threshold": 30.0,
+        "Lower_temperature_threshold": 15.0,
+        "Upper_humidity_threshold": 95.0,
+        "Lower_humidity_threshold": 75.0,
+        "Upper_light_threshold": 40000.0,
+        "Lower_light_threshold": 15000.0,
+        "Upper_moisture_threshold": 85.0,
+        "Lower_moisture_threshold": 70.0
+    },
+    {
+        "name_crop": "strawberry",
+        "Upper_temperature_threshold": 28.0,
+        "Lower_temperature_threshold": 10.0,
+        "Upper_humidity_threshold": 85.0,
+        "Lower_humidity_threshold": 65.0,
+        "Upper_light_threshold": 45000.0,
+        "Lower_light_threshold": 20000.0,
+        "Upper_moisture_threshold": 75.0,
+        "Lower_moisture_threshold": 60.0
+    },
+    {
+        "name_crop": "cucumber",
+        "Upper_temperature_threshold": 35.0,
+        "Lower_temperature_threshold": 18.0,
+        "Upper_humidity_threshold": 85.0,
+        "Lower_humidity_threshold": 65.0,
+        "Upper_light_threshold": 55000.0,
+        "Lower_light_threshold": 25000.0,
+        "Upper_moisture_threshold": 80.0,
+        "Lower_moisture_threshold": 65.0
+    },
+    {
+        "name_crop": "bell_pepper",
+        "Upper_temperature_threshold": 30.0,
+        "Lower_temperature_threshold": 15.0,
+        "Upper_humidity_threshold": 80.0,
+        "Lower_humidity_threshold": 60.0,
+        "Upper_light_threshold": 50000.0,
+        "Lower_light_threshold": 20000.0,
+        "Upper_moisture_threshold": 75.0,
+        "Lower_moisture_threshold": 60.0
+    }
+]
