@@ -22,15 +22,7 @@ from sklearn.metrics import (
 )
 
 
-def train_model(X, y, models_dir):
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=config.TEST_SIZE,
-        random_state=config.RANDOM_STATE
-    )
-
+def train_model(X_train, X_test, y_train, y_test, models_dir):
     print(f"Train Set: {X_train.shape[0]} samples")
     print(f"Test Set : {X_test.shape[0]} samples")
     print("-" * 50)

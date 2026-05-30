@@ -1,14 +1,14 @@
 import os
 
 DATA_URL = "https://raw.githubusercontent.com/AbhishekKandoi/Crop-Yield-Prediction-based-on-Indian-Agriculture/main/Crop%20Prediction%20dataset.csv"
-DATASET_DIR = "dataset"
+DATASET_DIR = "ML/dataset"
 RAW_DATA_FILE = "crop_data_raw.csv"
 
 
 
-MODELS_DIR = "models"
+MODELS_DIR = "ML/models"
 MODEL_FILE = "rf_crop_yield_model.pkl"
-REPORTS_DIR = "reports/figures"
+REPORTS_DIR = "ML/reports/figures"
 
 
 

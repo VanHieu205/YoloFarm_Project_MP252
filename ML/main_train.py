@@ -20,12 +20,10 @@ def main():
         file_path=config.RAW_DATA_PATH
     )
     print(df.head())
-    X, y = clean_and_prepare_data(
+    X_train, X_test, y_train, y_test = clean_and_prepare_data(
         df=df, 
         models_dir=config.MODELS_DIR
     )
-    print(X.dtypes)
-    print(y.head())
-    train_model(X, y, config.MODELS_DIR)
+    best_model = train_model(X_train, X_test, y_train, y_test, config.MODELS_DIR)
 if __name__ == "__main__":
     main()
