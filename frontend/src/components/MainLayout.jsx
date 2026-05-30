@@ -10,7 +10,7 @@ import {
   Users,
   Sprout,
   Brain,
-  MessageCircle,
+  MessageCircle
 } from 'lucide-react'
 import '../styles/layout.css'
 
