@@ -11,6 +11,7 @@ import Devices from "./pages/Devices"
 import Automation from "./pages/Automation"
 import AIAnalysis from './pages/AIAnalysis'
 import Chat from './pages/Chat'
+import PestDetection from './pages/PestDetection'
 import './styles/theme.css'
 import './styles/components.css'
 import './styles/layout.css'
@@ -129,6 +130,16 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <Chat />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pest-detection"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+               <PestDetection />
               </MainLayout>
             </ProtectedRoute>
           }

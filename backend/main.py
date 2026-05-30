@@ -8,6 +8,7 @@ from api.weather_routes import router as weather_router
 from api.automation_routes import router as autorouter
 from api.ai_routes import router as ai_router
 from api.chatbot_routes import router as chatbot_router
+from api.pest_detection_routes import router as pest_router
 app = FastAPI(
     title = "YoloFarm API System",
     description = "Backend API cho hệ thống nông nghiệp thông minh",
@@ -17,8 +18,8 @@ app = FastAPI(
 # Cấu hình CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -44,6 +45,10 @@ app.include_router(chatbot_router, prefix = "/api/chatbot", tags = ["Chatbot"])
 
 # Đăng ký Route của Farm
 app.include_router(farm_router, prefix="/api/farm", tags=["Farm"])  
+
+
+app.include_router(pest_router, prefix="/api/pest", tags=["Pest Detection"])
+
 
 @app.get("/")
 def root():

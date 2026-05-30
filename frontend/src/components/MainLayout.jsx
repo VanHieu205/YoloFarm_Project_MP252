@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LogOut, Menu, Bell } from 'lucide-react'
+import { LogOut, Menu, Bell, Bug } from 'lucide-react'
 import logo from "/logo.jpg"
 import {
   LayoutDashboard,
@@ -10,7 +10,7 @@ import {
   Users,
   Sprout,
   Brain,
-  MessageCircle
+  MessageCircle,
 } from 'lucide-react'
 import '../styles/layout.css'
 
@@ -34,6 +34,7 @@ export default function MainLayout({ children }) {
   { path: '/reports', label: 'Báo cáo', icon: <BarChart3 /> },
   { path: '/AIAnalysis', label: 'AI Analysis', icon: <Brain /> },
   { path: '/chat', label: 'Chatbot', icon: <MessageCircle /> },
+  { path: '/pest-detection', label: 'Nhận diện sâu bệnh', icon: <Bug /> }
 ]
 
   const adminItems = [
