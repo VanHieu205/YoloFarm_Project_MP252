@@ -4,7 +4,7 @@ Script để khởi tạo vector store với dữ liệu bệnh cây trồng
 
 import os
 from pathlib import Path
-from ML.rag_engine import RAGEngine
+from ml.rag_engine import RAGEngine
 from dotenv import load_dotenv
 
 # Load environment variables

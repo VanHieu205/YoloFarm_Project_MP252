@@ -108,7 +108,7 @@ class YieldPredictor:
             return models_dir
         current_dir  = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(current_dir))
-        resolved     = os.path.join(project_root, "ML", "models")
+        resolved     = os.path.join(project_root, "ML", "models", "tabular")
         if not os.path.exists(resolved):
             raise FileNotFoundError(f"Models directory not found: {os.path.abspath(resolved)}")
         return resolved

@@ -19,8 +19,8 @@ import subprocess
 # Load environment variables
 load_dotenv()
 
-from ML.rag_engine import RAGEngine
-from ML.initialize_rag import initialize_rag_engine
+from ml.rag_engine import RAGEngine
+from ml.initialize_rag import initialize_rag_engine
 from core.database import get_connection, close_connection
 from mqtt_publisher import mqtt_publisher
 

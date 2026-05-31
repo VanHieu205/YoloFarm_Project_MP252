@@ -5,11 +5,11 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from ML.ai_engine import YieldPredictor
+from ml.ai_engine import YieldPredictor
 from core.database import get_connection, close_connection
 
 router = APIRouter()
-ai_predictor = YieldPredictor(models_dir="../ML/models")
+ai_predictor = YieldPredictor(models_dir=None) 
 
 
 class PredictRequest(BaseModel):

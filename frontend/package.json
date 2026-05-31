@@ -16,6 +16,7 @@
     "react-dom": "^18.3.1",
     "react-icons": "^5.6.0",
     "react-router-dom": "^6.22.0",
+    "react-webcam": "^7.2.0",
     "recharts": "^2.10.3",
     "web-audio-api": "^0.2.2"
   },
