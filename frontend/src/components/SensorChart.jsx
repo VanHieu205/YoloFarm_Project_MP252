@@ -46,8 +46,8 @@ const SensorChart = () => {
   const [error, setError]         = useState(null)
 
   // ── Fetch biểu đồ ────────────────────────────────────────────────────────
-  const fetchChart = useCallback(async (m, d) => {
-    setLoading(true)
+  const fetchChart = useCallback(async (m, d, silent = false) => {
+    if (!silent) setLoading(true)
     setError(null)
     try {
       const params = new URLSearchParams({ mode: m })
@@ -66,7 +66,7 @@ const SensorChart = () => {
       console.error(err)
       setError("Không thể tải dữ liệu biểu đồ.")
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [])
 
@@ -82,6 +82,10 @@ const SensorChart = () => {
 
   useEffect(() => {
     fetchChart(mode, date)
+
+    if (mode !== "hour") return
+    const interval = setInterval(() => fetchChart("hour", date, true), 5000)
+    return () => clearInterval(interval)
   }, [mode, date, fetchChart])
 
   useEffect(() => {

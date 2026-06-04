@@ -40,6 +40,7 @@ def get_latest_data():
 def get_sensor_history_range(
     mode: str = Query("day", pattern="^(hour|day|month)$"),
     date: str = Query(None, description="Ngày cụ thể YYYY-MM-DD. Mặc định là hôm nay."),
+    limit: int = Query(None, ge=1, le=100)
 ):
     """
     mode=hour                → 60 phút gần nhất, group theo phút
@@ -49,7 +50,7 @@ def get_sensor_history_range(
     """
     connect = get_connection()
     cursor = connect.cursor(dictionary=True)
-
+ 
     try:
         # Validate date nếu có, mặc định là hôm nay cho mode=day
         if date:
@@ -59,11 +60,11 @@ def get_sensor_history_range(
                 raise HTTPException(status_code=400, detail="date không hợp lệ, dùng định dạng YYYY-MM-DD")
         elif mode == "day":
             date = dt.now().strftime("%Y-%m-%d")
-
+ 
         if mode == "hour":
             query = """
                 SELECT
-                    CONCAT(group_key, ':00') AS timestamp,
+                    FROM_UNIXTIME(group_key * 5) AS timestamp,
                     ROUND(AVG(temperature), 2)    AS temperature,
                     ROUND(AVG(humidity), 2)        AS humidity,
                     ROUND(AVG(soil_moisture), 2)   AS soil_moisture,
@@ -71,7 +72,7 @@ def get_sensor_history_range(
                     ROUND(AVG(co2), 2)             AS co2
                 FROM (
                     SELECT
-                        DATE_FORMAT(`timestamp`, '%Y-%m-%dT%H:%i') AS group_key,
+                        FLOOR(UNIX_TIMESTAMP(`timestamp`) / 5) AS group_key,
                         temperature, humidity, soil_moisture, light_intensity, co2
                     FROM sensor_readings
                     WHERE `timestamp` >= NOW() - INTERVAL 60 MINUTE
@@ -79,8 +80,12 @@ def get_sensor_history_range(
                 GROUP BY group_key
                 ORDER BY group_key ASC
             """
+            if limit != None:
+                query += f"\n LIMIT {limit}"
             cursor.execute(query)
-
+            
+                
+ 
         elif mode == "day":
             query = """
                 SELECT
@@ -101,7 +106,7 @@ def get_sensor_history_range(
                 ORDER BY group_key ASC
             """
             cursor.execute(query, (date,))
-
+ 
         else:  # month
             query = """
                 SELECT
@@ -122,14 +127,14 @@ def get_sensor_history_range(
                 ORDER BY group_key ASC
             """
             cursor.execute(query)
-
+ 
         return cursor.fetchall()
-
+ 
     except HTTPException:
         raise
     except Exception as e:
         print("HISTORY ERROR:", e)
         raise HTTPException(status_code=500, detail=str(e))
-
+ 
     finally:
         close_connection(connect, cursor)
