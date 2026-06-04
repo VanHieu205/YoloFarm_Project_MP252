@@ -500,7 +500,6 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
           </p>
         </div>
       )}
-
       {/* Loading AI */}
       {!cropsLoading && loading && (
         <div style={{ display:"flex", flexDirection:"column", alignItems:"center",

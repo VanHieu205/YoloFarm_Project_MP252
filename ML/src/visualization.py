@@ -34,3 +34,21 @@ def plot_feature_importance(model, feature_names, save_dir=None):
     
     plt.tight_layout()
     save_or_show_plot(fig, "Feature Importance", save_dir)
+
+def plot_correlation_matrix(df, target_col='Yield', save_dir=None):
+    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+    corr_matrix = df[numeric_cols].corr()
+
+    fig, ax = plt.subplots(figsize=(12, 10))
+    sns.heatmap(corr_matrix, 
+                annot=True,              
+                cmap='coolwarm',         
+                fmt=".2f",               
+                linewidths=0.5,
+                annot_kws={"size": 8},
+                ax=ax)   
+
+    ax.set_title('Ma trận tương quan giữa các biến số', fontsize=16)
+    
+    plt.tight_layout()
+    save_or_show_plot(fig, "Correlation Matrix", save_dir)
