@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-    baseURL: "https://avenge-task-common.ngrok-free.dev", // Port của Backend
+    baseURL: "http://localhost:8000", // Port của Backend
     headers: {
         'Content-Type': 'application/json',
         "ngrok-skip-browser-warning": "true",

@@ -65,7 +65,7 @@ const PestDetection = () => {
     formData.append('file', selectedImage);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/detect-disease-quick', {
+      const response = await fetch('http://localhost:8000/api/plant-disease/detect-disease-quick', {
         method: 'POST',
         body: formData,
       });

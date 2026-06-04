@@ -7,7 +7,7 @@ class Settings:
     # Cấu hình Database MySQL (XAMPP)
     DB_HOST: str = "localhost"
     DB_USER: str = "root"
-    DB_PASS: str = ""
+    DB_PASS: str = "123456"
     DB_NAME: str = "yolofarm"
 
     # Cấu hình MQTT Broker

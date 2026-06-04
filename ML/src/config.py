@@ -1,8 +1,9 @@
 import os
 
-ML_DIR = "ML"
-RANDOM_STATE = 42
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+ML_DIR = os.path.dirname(CURRENT_DIR)
 
+RANDOM_STATE = 42
 TABULAR_DATASET_DIR = os.path.join(ML_DIR, "dataset", "tabular")
 TABULAR_MODELS_DIR = os.path.join(ML_DIR, "models", "tabular")
 TABULAR_REPORTS_DIR = os.path.join(ML_DIR, "reports", "figures", "tabular")

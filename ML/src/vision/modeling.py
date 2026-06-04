@@ -4,10 +4,9 @@ import torch.optim as optim
 from torchvision import models
 from ML.src import config
 
-
 def build_model(num_classes):
-    model = models.mobilenet_v2(
-        weights=models.MobileNet_V2_Weights.DEFAULT
+    model = models.efficientnet_v2_s(
+        weights=models.EfficientNet_V2_S_Weights.DEFAULT
     )
 
     for param in model.features.parameters():
@@ -16,13 +15,14 @@ def build_model(num_classes):
     for param in model.features[-3:].parameters():
         param.requires_grad = True
 
+    num_ftrs = model.classifier[1].in_features
+
     model.classifier[1] = nn.Linear(
-        model.last_channel,
+        num_ftrs,
         num_classes
     )
 
     return model
-
 
 def evaluate(model, loader, criterion, device):
     model.eval()
@@ -50,7 +50,6 @@ def evaluate(model, loader, criterion, device):
     acc = correct / total
 
     return loss, acc
-
 
 def train_model(model, train_loader, val_loader):
     device = torch.device(

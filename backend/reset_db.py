@@ -4,7 +4,7 @@ from mysql.connector import Error
 db_config = {
     "host": "localhost",
     "user": "root",
-    "password": ""
+    "password": "123456"
 }
 
 try:

@@ -1,10 +1,18 @@
 import io
 import json
+import os
+import sys
 
 from fastapi import APIRouter, HTTPException, File, UploadFile
 import torch
 from PIL import Image
 from torchvision import transforms
+
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_dir, "../../"))
+if project_root not in sys.path:
+    sys.path.append(project_root)
 
 from ML.src import config
 from ML.src.vision.modeling import build_model
@@ -59,7 +67,7 @@ async def detect_disease_quick(file: UploadFile = File(...)):
         disease_name = vision_class_names[predicted_idx.item()]
         conf_score = round(confidence.item() * 100, 2)
 
-        if conf_score < 65.0:
+        if conf_score < 25.0:
             disease_name = "Unknown"
             expert_analysis = {
                 "name_vn": "Không thể chẩn đoán rõ ràng",

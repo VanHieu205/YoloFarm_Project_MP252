@@ -11,15 +11,15 @@ Fine Params   : {'colsample_bytree': 0.6, 'learning_rate': 0.01, 'max_depth': 8,
 
 [ EVALUATION METRICS ]
 
-R^2 Train      :     0.6709
-R^2 Test       :     0.6559
+R^2 Train      :     0.6708
+R^2 Test       :     0.6548
 5-Fold CV R^2  :     0.6612
-Gap Difference :     0.0149
+Gap Difference :     0.0159
 
 ----------------------------------------------------
 
-MAE (Test)     :    51.1839
-RMSE (Test)    :   530.0650
+MAE (Test)     :    51.2718
+RMSE (Test)    :   530.9129
 
 [ MODEL CONFIGURATION ]
 
