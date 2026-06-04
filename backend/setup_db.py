@@ -5,7 +5,7 @@ import re
 db_config = {
     "host": "localhost",
     "user": "root",
-    "password": "123456"
+    "password": ""
 }
 
 def parse_sql_statements(sql_script):
