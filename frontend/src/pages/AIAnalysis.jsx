@@ -6,7 +6,7 @@ import {
   Clock, Bot, Play, Sparkles, Activity, ChevronDown,
 } from "lucide-react"
 
-const API = "http://localhost:8000"
+const API = import.meta.env.VITE_API_URL
 const TARGET_YIELD_KG = 6200
 
 // ─── Tính risk từ health + yield ─────────────────────────────────────────
@@ -350,7 +350,10 @@ const AIAnalysis = ({ navigate, userId = "USR-002" }) => {
     setSensor(null)
     setAiAnalysis(null)
     setSelectedCrop(null)
-    axios.get(`${API}/api/farm/crops`, { params: { user_id: userId } })
+    axios.get(`${API}/api/farm/crops`, {
+      params: { user_id: userId },
+      headers: { 'ngrok-skip-browser-warning': 'true' }  // ← thêm
+    })
       .then(res => {
         const list = Array.isArray(res.data) ? res.data : (res.data?.crops ?? [])
         const growing = list.filter(c => c.status === "growing" || !c.status)

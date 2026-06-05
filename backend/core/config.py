@@ -5,8 +5,8 @@ class Settings:
     PROJECT_VERSION: str = "1.0.0"
 
     # Cấu hình Database MySQL (XAMPP)
-    DB_HOST: str = "localhost"
-    DB_USER: str = "root"
+    DB_HOST: str = "172.25.224.1"
+    DB_USER: str = "farmuser"
     DB_PASS: str = "123456"
     DB_NAME: str = "yolofarm"
 
