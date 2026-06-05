@@ -65,7 +65,8 @@ const PestDetection = () => {
     formData.append('file', selectedImage);
 
     try {
-      const response = await fetch('http://localhost:8000/api/plant-disease/detect-disease-quick', {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/plant-disease/detect-disease-quick`, {
         method: 'POST',
         body: formData,
       });

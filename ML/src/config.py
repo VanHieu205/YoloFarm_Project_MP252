@@ -26,7 +26,7 @@ VISION_REPORTS_DIR = os.path.join(ML_DIR, "reports", "figures", "vision")
 
 KAGGLE_VISION_DATASET = "emmarex/plantdisease"
 
-VISION_MODEL_FILE = "disease_mobilenet_v2.pth"
+VISION_MODEL_FILE = "EfficientNet_V2_S_Weights.pth"
 VISION_MODEL_PATH = os.path.join(
     VISION_MODELS_DIR,
     VISION_MODEL_FILE

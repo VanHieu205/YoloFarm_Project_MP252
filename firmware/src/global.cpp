@@ -16,8 +16,8 @@ bool glob_pump_state = false;
 unsigned long bootMillis = 0;
 
 
-String wifi_ssid = "iPhone";
-String wifi_password = "Hieuvan205";
+String wifi_ssid = "Galaxy A03 06a5";
+String wifi_password = "lliw6083";
 boolean isWifiConnected = false;
 volatile uint8_t button_press_count = 0;
 QueueHandle_t xJsonQueue = NULL;
