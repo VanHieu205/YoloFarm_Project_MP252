@@ -8,7 +8,7 @@ LiquidCrystal_I2C lcd(33, 16, 2);   // Địa chỉ 0x21
 // --- CÁC BIẾN QUẢN LÝ TRANG ---
 static bool lcd_hold = false;
 const unsigned long PAGE_MS = 5000; 
-const uint8_t PAGE_COUNT = 4;       // Tổng cộng 5 trang
+const uint8_t PAGE_COUNT = 5;       // Tổng cộng 5 trang
 static uint8_t currentPage = 0;
 static unsigned long lastPageMs = 0;
 
@@ -104,7 +104,12 @@ void updateLCDPages() {
       if (glob_pump_state) lcd.print(" ON "); else lcd.print(" OFF");
       break;
     }
-    case 3: {
+    case 3: { // Trang AI 
+      lcdPrintLine(lcd, 0, "AI: N/A         "); 
+      lcdPrintLine(lcd, 1, "WAITING MODEL...");
+      break;
+    }
+    case 4: {
       if (WiFi.status() == WL_CONNECTED) {
         lcdPrintLine(lcd, 0, "WiFi: CONNECTED ");
         lcdPrintLine(lcd, 1, WiFi.localIP().toString().c_str());
