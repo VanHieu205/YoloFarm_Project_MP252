@@ -3,10 +3,11 @@
   import { FaSeedling, FaList, FaBox, FaLeaf, FaDroplet, FaSprayCan, FaScissors, FaChartColumn, FaStar, FaClipboard, FaRuler, FaCalendarDays } from 'react-icons/fa6'
   import '../styles/components.css'
   import axiosClient from "../api/axiosClient"
-  const user = JSON.parse(localStorage.getItem("user"))
-  const USER_ID = user?.user_id
+ 
   const DEVICE_ID = "DEV-001"  // thay bằng device thực tế
   const FarmManagement = () => {
+    const user = JSON.parse(localStorage.getItem("user"))
+    const USER_ID = user?.user_id
     // Helper function to render activity with icon
     const getActivityIcon = (activityName) => {
       const icons = {
