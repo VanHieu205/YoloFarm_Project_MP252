@@ -264,7 +264,5 @@ CREATE INDEX idx_ai_rec_prediction ON ai_recommendations(prediction_id);
 CREATE INDEX idx_alert_crop ON alerts(crop_id);
 CREATE INDEX idx_crop_devices_device ON crop_devices(device_id);
 
-CREATE INDEX idx_crop_device ON crops(device_id);
-CREATE INDEX idx_ai_actions_rec ON ai_actions(recommendation_id);
 CREATE INDEX idx_chatbot_user ON chatbot_history(user_id, timestamp);
 CREATE INDEX idx_ai_prediction_user ON ai_prediction_history(user_id, timestamp);
